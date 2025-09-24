@@ -1,5 +1,6 @@
 package com.system.service.impl;
 
+import com.system.dto.BriefCampusDTO;
 import com.system.entity.Campus;
 import com.system.mapper.CampusMapper;
 import com.system.service.CampusService;
@@ -8,8 +9,10 @@ import com.system.vo.CompleteCampusVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -40,6 +43,23 @@ public class CampusServiceImpl implements CampusService {
                 .address(campus.getAddress())
                 .phone(campus.getPhone())
                 .center(campus.getCenter())
+                .createTime(String.valueOf(campus.getCreateTime()))
                 .build();
+    }
+
+    @Override
+    public CompleteCampusVO createCampus(BriefCampusDTO briefCampusDTO) {
+        Campus campus = Campus.builder()
+                .campusId(UUID.randomUUID())
+                .name(briefCampusDTO.getName())
+                .address(briefCampusDTO.getAddress())
+                .phone(briefCampusDTO.getPhone())
+                .center(briefCampusDTO.getCenter())
+                .createTime(LocalDateTime.now())
+                .updateTime(LocalDateTime.now())
+                .deleted(false)
+                .build();
+
+        return campusMapper.createCampus(campus);
     }
 }

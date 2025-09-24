@@ -1,6 +1,7 @@
 package com.system.mapper;
 
 import com.system.entity.Campus;
+import com.system.vo.CompleteCampusVO;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
 
@@ -14,4 +15,6 @@ public interface CampusMapper {
 
     @Select("select * from campuses where id = #{campusId}")
     Campus queryById(Long campusId);
+
+    CompleteCampusVO createCampus(Campus campus);
 }

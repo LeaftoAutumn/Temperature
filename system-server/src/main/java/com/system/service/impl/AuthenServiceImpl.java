@@ -37,6 +37,8 @@ public class AuthenServiceImpl implements AuthenService {
                 .campusId(UUID.fromString(registerDTO.getCampusId()))
                 .role(User.Role.valueOf(registerDTO.getRole().toUpperCase()))
                 .createTime(String.valueOf(LocalDateTime.now()))
+                .updateTime(String.valueOf(LocalDateTime.now()))
+                .deleted(false)
                 .build();
 
         userMapper.createUser(Collections.singletonList(user));

@@ -6,7 +6,7 @@
     <insert id="createUser" useGeneratedKeys="true" keyProperty="id">
         insert into user (id, username, password_hash, name, gender, birth_date, phone, email, campus_id, role, create_time, update_time, delete_flag)
         values
-        (#{userId}, #{username}, #{password}, #{name}, #{gender}, #{birthDate}, #{phone}, #{email}, #{campusId}, #{role}, now(), now(), 0)
+        (#{userId}, #{username}, #{password}, #{name}, #{gender}, #{birthDate}, #{phone}, #{email}, #{campusId}, #{role}, #{createTime}, #{updateTime}, #{deleted})
     </insert>
 
 </mapper>
