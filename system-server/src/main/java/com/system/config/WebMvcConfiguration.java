@@ -67,7 +67,7 @@ public class WebMvcConfiguration extends WebMvcConfigurationSupport {
                 .groupName("admin")
                 .apiInfo(apiInfo)
                 .select()
-                .apis(RequestHandlerSelectors.basePackage("com.sky.controller.admin"))
+                .apis(RequestHandlerSelectors.basePackage("com.system.controller.admin"))
                 .paths(PathSelectors.any())
                 .build();
         return docket;
@@ -84,7 +84,7 @@ public class WebMvcConfiguration extends WebMvcConfigurationSupport {
                 .groupName("user")
                 .apiInfo(apiInfo)
                 .select()
-                .apis(RequestHandlerSelectors.basePackage("com.sky.controller.user"))
+                .apis(RequestHandlerSelectors.basePackage("com.system.controller.user"))
                 .paths(PathSelectors.any())
                 .build();
         return docket;
@@ -95,6 +95,7 @@ public class WebMvcConfiguration extends WebMvcConfigurationSupport {
      *
      * @param registry
      */
+    @Override
     protected void addResourceHandlers(ResourceHandlerRegistry registry) {
         log.info("开始设置静态资源映射...");
         registry.addResourceHandler("/doc.html").addResourceLocations("classpath:/META-INF/resources/");
@@ -106,6 +107,7 @@ public class WebMvcConfiguration extends WebMvcConfigurationSupport {
      *
      * @param converters
      */
+    @Override
     protected void extendMessageConverters(List<HttpMessageConverter<?>> converters) {
         log.info("开始扩展消息转换器...");
 
