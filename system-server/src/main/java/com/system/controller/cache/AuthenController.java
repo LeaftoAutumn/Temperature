@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.HashMap;
 import java.util.Map;
 
-@RestController
+@RestController("cacheAuthenController")
 @RequestMapping("/coach/auth")
 @Slf4j
 @Api("教练认证")

@@ -1,9 +1,7 @@
-package com.system.controller.user;
+package com.system.controller.student;
 
 import com.system.constant.JwtClaimsConstant;
-import com.system.context.BaseContext;
 import com.system.dto.LoginDTO;
-import com.system.dto.RegisterDTO;
 import com.system.entity.User;
 import com.system.properties.JwtProperties;
 import com.system.result.Result;
@@ -22,7 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.HashMap;
 import java.util.Map;
 
-@RestController
+@RestController("studentAuthenController")
 @RequestMapping("/student/auth")
 @Slf4j
 @Api("学生认证")

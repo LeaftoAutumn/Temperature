@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 /**
  * 公共认证
  */
-@RestController
+@RestController("commonAuthenController")
 @RequestMapping("/common/auth")
 @Slf4j
 @Api(tags = "公共认证")

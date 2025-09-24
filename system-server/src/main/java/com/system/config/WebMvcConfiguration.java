@@ -43,11 +43,15 @@ public class WebMvcConfiguration extends WebMvcConfigurationSupport {
         log.info("开始注册自定义拦截器...");
         registry.addInterceptor(jwtTokenAdminInterceptor)
                 .addPathPatterns("/admin/**")
-                .excludePathPatterns("/admin/admin/login");
-        registry.addInterceptor(jwtTokenStudentInterceptor)
-                .addPathPatterns("/user/**")
-                .excludePathPatterns("/user/user/login")
-                .excludePathPatterns("/user/shop/status");
+                .excludePathPatterns("/admin/auth/login");
+        registry.addInterceptor(jwtTokenAdminInterceptor)
+                .addPathPatterns("/coach/**")
+                .excludePathPatterns("/coach/auth/login");
+        registry.addInterceptor(jwtTokenAdminInterceptor)
+                .addPathPatterns("/student/**")
+                .excludePathPatterns("/student/auth/login");
+        registry.addInterceptor(jwtTokenAdminInterceptor)
+                .addPathPatterns("/common/**");
     }
 
     /**
@@ -59,9 +63,9 @@ public class WebMvcConfiguration extends WebMvcConfigurationSupport {
     public Docket docketAdmin() {
         log.info("准备生成管理端接口文档...");
         ApiInfo apiInfo = new ApiInfoBuilder()
-                .title("管理端外卖项目接口文档")
+                .title("管理端项目接口文档")
                 .version("1.0")
-                .description("管理端外卖项目接口文档")
+                .description("管理端项目接口文档")
                 .build();
         Docket docket = new Docket(DocumentationType.SWAGGER_2)
                 .groupName("admin")
@@ -72,19 +76,56 @@ public class WebMvcConfiguration extends WebMvcConfigurationSupport {
                 .build();
         return docket;
     }
+
     @Bean
-    public Docket docketUser() {
-        log.info("准备生成用户端接口文档...");
+    public Docket docketCache() {
+        log.info("准备生成教练端接口文档...");
         ApiInfo apiInfo = new ApiInfoBuilder()
-                .title("用户端外卖项目接口文档")
+                .title("教练端项目接口文档")
                 .version("1.0")
-                .description("用户端外卖项目接口文档")
+                .description("教练端项目接口文档")
                 .build();
         Docket docket = new Docket(DocumentationType.SWAGGER_2)
-                .groupName("user")
+                .groupName("cache")
                 .apiInfo(apiInfo)
                 .select()
-                .apis(RequestHandlerSelectors.basePackage("com.system.controller.user"))
+                .apis(RequestHandlerSelectors.basePackage("com.system.controller.cache"))
+                .paths(PathSelectors.any())
+                .build();
+        return docket;
+    }
+
+    @Bean
+    public Docket docketStudent() {
+        log.info("准备生成学生端接口文档...");
+        ApiInfo apiInfo = new ApiInfoBuilder()
+                .title("学生端项目接口文档")
+                .version("1.0")
+                .description("学生端项目接口文档")
+                .build();
+        Docket docket = new Docket(DocumentationType.SWAGGER_2)
+                .groupName("student")
+                .apiInfo(apiInfo)
+                .select()
+                .apis(RequestHandlerSelectors.basePackage("com.system.controller.student"))
+                .paths(PathSelectors.any())
+                .build();
+        return docket;
+    }
+
+    @Bean
+    public Docket docketCommon() {
+        log.info("准备生成公共端接口文档...");
+        ApiInfo apiInfo = new ApiInfoBuilder()
+                .title("公共端项目接口文档")
+                .version("1.0")
+                .description("公共端项目接口文档")
+                .build();
+        Docket docket = new Docket(DocumentationType.SWAGGER_2)
+                .groupName("common")
+                .apiInfo(apiInfo)
+                .select()
+                .apis(RequestHandlerSelectors.basePackage("com.system.controller.common"))
                 .paths(PathSelectors.any())
                 .build();
         return docket;

@@ -21,7 +21,7 @@ import java.util.Map;
 /**
  * 管理员认证
  */
-@RestController
+@RestController("adminAuthenController")
 @RequestMapping("/admin/auth")
 @Slf4j
 @Api(tags = "管理员认证")

@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
-@RestController
+@RestController("commonCampusController")
 @RequestMapping("/common/campus")
 @Slf4j
 @Api(tags = "公共校区管理")
