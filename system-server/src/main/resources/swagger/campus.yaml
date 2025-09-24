@@ -1,0 +1,318 @@
+openapi: 3.0.0
+info:
+  title: 乒乓球培训管理系统 - 校区管理 API
+  description: |-
+    提供校区的创建、查询、修改以及获取校区用户列表等功能。
+    注意：部分操作需要超级管理员权限。
+  version: 1.0.0
+
+servers:
+  - url: https://api.example.com/v1
+    description: 生产环境服务器
+
+tags:
+  - name: Campuses
+    description: 校区管理
+
+paths:
+  /campuses:
+    x-controller: CampusController
+    get:
+      tags: [ Campuses ]
+      summary: 获取所有校区列表
+      operationId: listCampuses
+      description: |-
+        获取系统中所有校区的列表。
+        此接口通常用于注册时的下拉选择或管理员查看所有校区。
+      responses:
+        '200':
+          description: 成功获取校区列表
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Campus'
+        '500':
+          description: 服务器内部错误
+      security: [ ]
+
+    post:
+      tags: [ Campuses ]
+      summary: 创建新校区
+      operationId: createCampus
+      description: |-
+        创建新的校区。**需要超级管理员权限**。
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CampusCreateRequest'
+      responses:
+        '201':
+          description: 校区创建成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Campus'
+        '400':
+          description: 请求参数错误（如校区名称已存在）
+        '401':
+          description: 未授权
+        '403':
+          description: 权限不足（非超级管理员）
+        '500':
+          description: 服务器内部错误
+      security:
+        - BearerAuth: [ ]
+
+  /campuses/{campusId}:
+    x-controller: CampusController
+    parameters:
+      - name: campusId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: 校区ID
+
+    get:
+      tags: [ Campuses ]
+      summary: 获取指定校区详情
+      operationId: getCampus
+      description: 根据ID获取指定校区的详细信息。
+      responses:
+        '200':
+          description: 成功获取校区信息
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Campus'
+        '404':
+          description: 校区不存在
+        '500':
+          description: 服务器内部错误
+      security: [ ]
+
+    put:
+      tags: [ Campuses ]
+      summary: 更新校区信息
+      operationId: updateCampus
+      description: |-
+        更新指定校区的信息。
+        **需要超级管理员或该校区管理员的权限**。
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CampusUpdateRequest'
+      responses:
+        '200':
+          description: 校区信息更新成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Campus'
+        '400':
+          description: 请求参数错误
+        '401':
+          description: 未授权
+        '403':
+          description: 权限不足（非超级管理员或非本校区管理员）
+        '404':
+          description: 校区不存在
+        '500':
+          description: 服务器内部错误
+      security:
+        - BearerAuth: [ ]
+
+  /campuses/{campusId}/users:
+    x-controller: CampusUserController
+    get:
+      tags: [ Campuses ]
+      summary: 获取校区用户列表
+      operationId: listCampusUsers
+      description: |-
+        获取指定校区的所有用户列表，可按角色过滤。
+        **需要超级管理员或该校区管理员的权限**。
+      parameters:
+        - name: campusId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: 校区ID
+        - name: role
+          in: query
+          schema:
+            type: string
+            enum: [ super_admin, campus_admin, student, coach ]
+          description: 按角色过滤用户
+        - name: page
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+          description: 页码
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+          description: 每页数量
+      responses:
+        '200':
+          description: 成功获取用户列表
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  users:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/CampusUser'
+                  pagination:
+                    $ref: '#/components/schemas/Pagination'
+        '401':
+          description: 未授权
+        '403':
+          description: 权限不足
+        '404':
+          description: 校区不存在
+        '500':
+          description: 服务器内部错误
+      security:
+        - BearerAuth: [ ]
+
+components:
+  schemas:
+    Campus:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "550e8400-e29b-41d4-a716-446655440000"
+        name:
+          type: string
+          example: "北京中心校区"
+        address:
+          type: string
+          nullable: true
+          example: "北京市海淀区中关村大街1号"
+        contact_phone:
+          type: string
+          nullable: true
+          example: "010-12345678"
+        is_center:
+          type: boolean
+          example: true
+        create_time:
+          type: string
+          format: date-time
+          example: "2023-10-25T08:30:00Z"
+      description: 校区信息
+
+    CampusCreateRequest:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+          example: "上海分校区"
+        address:
+          type: string
+          nullable: true
+          example: "上海市浦东新区张江高科技园区"
+        contact_phone:
+          type: string
+          nullable: true
+          example: "021-87654321"
+        is_center:
+          type: boolean
+          default: false
+          example: false
+      description: 创建校区请求体
+
+    CampusUpdateRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          example: "上海分校区(新)"
+        address:
+          type: string
+          nullable: true
+          example: "上海市浦东新区张江高科技园区新地址"
+        contact_phone:
+          type: string
+          nullable: true
+          example: "021-87654322"
+        is_center:
+          type: boolean
+          example: false
+      description: 更新校区请求体
+
+    CampusUser:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "550e8400-e29b-41d4-a716-446655440001"
+        username:
+          type: string
+          example: "zhangsan"
+        name:
+          type: string
+          example: "张三"
+        phone:
+          type: string
+          example: "13800138000"
+        email:
+          type: string
+          format: email
+          nullable: true
+          example: "zhangsan@example.com"
+        role:
+          type: string
+          enum: [ super_admin, campus_admin, student, coach ]
+          example: "student"
+        create_time:
+          type: string
+          format: date-time
+          example: "2023-10-26T09:15:00Z"
+
+    Pagination:
+      type: object
+      properties:
+        page:
+          type: integer
+          example: 1
+        limit:
+          type: integer
+          example: 20
+        total:
+          type: integer
+          example: 100
+        pages:
+          type: integer
+          example: 5
+
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+security:
+  - BearerAuth: [ ]

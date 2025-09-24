@@ -1,0 +1,626 @@
+openapi: 3.0.0
+info:
+  title: 乒乓球培训管理系统 - 课程与预约 API
+  description: |-
+    提供课程预约、取消、确认、查询课表等功能。
+    涉及学员预约课程、教练确认预约、双方取消课程等核心业务流程。
+  version: 1.0.0
+
+servers:
+  - url: https://api.example.com/v1
+    description: 生产环境服务器
+
+tags:
+  - name: Courses & Reservations
+    description: 课程预约与管理
+
+paths:
+  /time-slots/available:
+    x-controller: TimeSlotController
+    get:
+      tags: [ Courses & Reservations ]
+      summary: 查询可用时段
+      operationId: getAvailableTimeSlots
+      description: |-
+        查询指定教练在指定日期的可用时段。
+        会自动排除已预约的时段和不可用的球桌。
+      parameters:
+        - name: coachId
+          in: query
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: 教练ID
+        - name: date
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+          description: 查询日期 (YYYY-MM-DD)
+        - name: duration
+          in: query
+          schema:
+            type: integer
+            default: 60
+          description: 课程时长（分钟）
+      responses:
+        '200':
+          description: 成功获取可用时段
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AvailableTimeSlot'
+        '400':
+          description: 请求参数错误
+        '500':
+          description: 服务器内部错误
+      security:
+        - BearerAuth: [ ]
+
+  /reservations:
+    x-controller: ReservationController
+    post:
+      tags: [ Courses & Reservations ]
+      summary: 创建课程预约
+      operationId: createReservation
+      description: |-
+        学员创建课程预约。
+        系统会验证双选关系、时段可用性、学员余额等条件。
+        创建成功后会自动通知教练。
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateReservationRequest'
+      responses:
+        '201':
+          description: 预约创建成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReservationDetail'
+        '400':
+          description: |-
+            预约失败。可能的原因：
+            - 学员与教练无双选关系
+            - 时段已被占用
+            - 学员余额不足
+            - 球桌不可用
+        '401':
+          description: 未授权
+        '500':
+          description: 服务器内部错误
+      security:
+        - BearerAuth: [ ]
+
+    get:
+      tags: [ Courses & Reservations ]
+      summary: 获取预约列表
+      operationId: listReservations
+      description: |-
+        获取当前用户的预约列表。
+        学员可以看到自己的预约，教练可以看到自己的课程安排。
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [ pending, confirmed, cancelled, completed ]
+          description: 按预约状态过滤
+        - name: startDate
+          in: query
+          schema:
+            type: string
+            format: date
+          description: 开始日期 (YYYY-MM-DD)
+        - name: endDate
+          in: query
+          schema:
+            type: string
+            format: date
+          description: 结束日期 (YYYY-MM-DD)
+        - name: page
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+          description: 页码
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+          description: 每页数量
+      responses:
+        '200':
+          description: 成功获取预约列表
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  reservations:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ReservationListItem'
+                  pagination:
+                    $ref: '#/components/schemas/Pagination'
+        '401':
+          description: 未授权
+        '500':
+          description: 服务器内部错误
+      security:
+        - BearerAuth: [ ]
+
+  /reservations/{reservationId}:
+    x-controller: ReservationController
+    parameters:
+      - name: reservationId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: 预约ID
+
+    put:
+      tags: [ Courses & Reservations ]
+      summary: 处理预约（确认/拒绝）
+      operationId: updateReservationStatus
+      description: |-
+        教练确认或拒绝学员的预约。
+        确认后会从学员账户扣除相应费用。
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - status
+              properties:
+                status:
+                  type: string
+                  enum: [ confirmed, rejected ]
+                  description: 处理结果
+                  example: "confirmed"
+      responses:
+        '200':
+          description: 处理成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReservationDetail'
+        '400':
+          description: |-
+            处理失败。可能的原因：
+            - 预约已被处理过
+            - 学员余额不足（确认时）
+        '401':
+          description: 未授权
+        '403':
+          description: 无权处理此预约
+        '404':
+          description: 预约不存在
+        '500':
+          description: 服务器内部错误
+      security:
+        - BearerAuth: [ ]
+
+  /users/{userId}/timetable:
+    x-controller: TimetableController
+    get:
+      tags: [ Courses & Reservations ]
+      summary: 获取用户课表
+      operationId: getUserTimetable
+      description: |-
+        获取指定用户的课程表，支持按周或日维度查询。
+        学员可以看到自己的课程，教练可以看到自己的授课安排。
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: 用户ID
+        - name: startDate
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+          description: 开始日期 (YYYY-MM-DD)
+        - name: endDate
+          in: query
+          schema:
+            type: string
+            format: date
+          description: 结束日期 (YYYY-MM-DD)，不传则默认为开始日期后7天
+        - name: view
+          in: query
+          schema:
+            type: string
+            enum: [ day, week ]
+            default: week
+          description: 视图类型（按天或按周）
+      responses:
+        '200':
+          description: 成功获取课表
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TimetableItem'
+        '401':
+          description: 未授权
+        '403':
+          description: 无权查看他人课表
+        '404':
+          description: 用户不存在
+        '500':
+          description: 服务器内部错误
+      security:
+        - BearerAuth: [ ]
+
+  /cancelations/remaining:
+    x-controller: CancellationController
+    get:
+      tags: [ Courses & Reservations ]
+      summary: 获取本月剩余取消次数
+      operationId: getRemainingCancellations
+      description: 获取当前用户本月剩余的课程取消次数。
+      responses:
+        '200':
+          description: 成功获取剩余取消次数
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  remaining:
+                    type: integer
+                    example: 3
+                  used:
+                    type: integer
+                    example: 0
+        '401':
+          description: 未授权
+        '500':
+          description: 服务器内部错误
+      security:
+        - BearerAuth: [ ]
+
+  /cancelations:
+    x-controller: CancellationController
+    post:
+      tags: [ Courses & Reservations ]
+      summary: 发起取消申请
+      operationId: createCancellation
+      description: |-
+        学员或教练发起课程取消申请。
+        系统会验证是否提前至少24小时且本月取消次数未超限。
+        创建成功后会自动通知对方确认。
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - reservationId
+                - reason
+              properties:
+                reservationId:
+                  type: string
+                  format: uuid
+                  description: 预约ID
+                  example: "550e8400-e29b-41d4-a716-446655440001"
+                reason:
+                  type: string
+                  description: 取消原因
+                  example: "临时有事"
+      responses:
+        '201':
+          description: 取消申请提交成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CancellationRequest'
+        '400':
+          description: |-
+            取消失败。可能的原因：
+            - 未提前24小时取消
+            - 本月取消次数已用完
+            - 课程状态不允许取消
+        '401':
+          description: 未授权
+        '404':
+          description: 预约不存在
+        '500':
+          description: 服务器内部错误
+      security:
+        - BearerAuth: [ ]
+
+  /cancelations/{cancellationId}:
+    x-controller: CancellationController
+    parameters:
+      - name: cancellationId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: 取消申请ID
+
+    put:
+      tags: [ Courses & Reservations ]
+      summary: 确认取消申请
+      operationId: confirmCancellation
+      description: |-
+        对方（学员或教练）确认取消申请。
+        确认后会更新课程状态并自动退款（如已支付）。
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - confirm
+              properties:
+                confirm:
+                  type: boolean
+                  description: 是否确认取消
+                  example: true
+      responses:
+        '200':
+          description: 取消确认成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CancellationRequest'
+        '400':
+          description: |-
+            确认失败。可能的原因：
+            - 取消申请已被处理过
+        '401':
+          description: 未授权
+        '403':
+          description: 无权处理此取消申请
+        '404':
+          description: 取消申请不存在
+        '500':
+          description: 服务器内部错误
+      security:
+        - BearerAuth: [ ]
+
+components:
+  schemas:
+    AvailableTimeSlot:
+      type: object
+      properties:
+        startTime:
+          type: string
+          format: date-time
+          example: "2023-11-01T10:00:00Z"
+        endTime:
+          type: string
+          format: date-time
+          example: "2023-11-01T11:00:00Z"
+        availableTables:
+          type: array
+          items:
+            type: integer
+          description: 可用球桌编号列表
+          example: [ 1, 3, 5 ]
+
+    CreateReservationRequest:
+      type: object
+      required:
+        - studentId
+        - coachId
+        - startTime
+        - endTime
+      properties:
+        studentId:
+          type: string
+          format: uuid
+          example: "550e8400-e29b-41d4-a716-446655440002"
+        coachId:
+          type: string
+          format: uuid
+          example: "550e8400-e29b-41d4-a716-446655440003"
+        startTime:
+          type: string
+          format: date-time
+          example: "2023-11-01T10:00:00Z"
+        endTime:
+          type: string
+          format: date-time
+          example: "2023-11-01T11:00:00Z"
+        tableNumber:
+          type: integer
+          nullable: true
+          description: 指定球桌编号（不指定则系统自动分配）
+          example: 3
+
+    ReservationListItem:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "550e8400-e29b-41d4-a716-446655440004"
+        studentId:
+          type: string
+          format: uuid
+          example: "550e8400-e29b-41d4-a716-446655440002"
+        studentName:
+          type: string
+          example: "张三"
+        coachId:
+          type: string
+          format: uuid
+          example: "550e8400-e29b-41d4-a716-446655440003"
+        coachName:
+          type: string
+          example: "王教练"
+        startTime:
+          type: string
+          format: date-time
+          example: "2023-11-01T10:00:00Z"
+        endTime:
+          type: string
+          format: date-time
+          example: "2023-11-01T11:00:00Z"
+        duration:
+          type: integer
+          example: 60
+        price:
+          type: number
+          format: float
+          example: 150.00
+        status:
+          type: string
+          enum: [ pending, confirmed, cancelled, completed ]
+          example: "pending"
+        tableNumber:
+          type: integer
+          nullable: true
+          example: 3
+        createTime:
+          type: string
+          format: date-time
+          example: "2023-10-30T09:15:00Z"
+
+    ReservationDetail:
+      allOf:
+        - $ref: '#/components/schemas/ReservationListItem'
+        - type: object
+          properties:
+            courseId:
+              type: string
+              format: uuid
+              nullable: true
+              example: "550e8400-e29b-41d4-a716-446655440005"
+            canCancel:
+              type: boolean
+              description: 当前用户是否可以取消此预约
+              example: true
+
+    TimetableItem:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "550e8400-e29b-41d4-a716-446655440006"
+        date:
+          type: string
+          format: date
+          example: "2023-11-01"
+        startTime:
+          type: string
+          format: date-time
+          example: "2023-11-01T10:00:00Z"
+        endTime:
+          type: string
+          format: date-time
+          example: "2023-11-01T11:00:00Z"
+        type:
+          type: string
+          enum: [ course, tournament ]
+          example: "course"
+        title:
+          type: string
+          example: "乒乓球课程"
+        location:
+          type: string
+          example: "北京中心校区"
+        tableNumber:
+          type: integer
+          nullable: true
+          example: 3
+        withUser:
+          type: object
+          properties:
+            id:
+              type: string
+              format: uuid
+              example: "550e8400-e29b-41d4-a716-446655440003"
+            name:
+              type: string
+              example: "王教练"
+            role:
+              type: string
+              example: "coach"
+        status:
+          type: string
+          enum: [ pending, confirmed, cancelled, completed ]
+          example: "confirmed"
+
+    CancellationRequest:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "550e8400-e29b-41d4-a716-446655440007"
+        reservationId:
+          type: string
+          format: uuid
+          example: "550e8400-e29b-41d4-a716-446655440004"
+        initiatedBy:
+          type: string
+          enum: [ student, coach ]
+          example: "student"
+        reason:
+          type: string
+          example: "临时有事"
+        status:
+          type: string
+          enum: [ pending, confirmed, rejected ]
+          example: "pending"
+        createTime:
+          type: string
+          format: date-time
+          example: "2023-11-01T09:00:00Z"
+        updateTime:
+          type: string
+          format: date-time
+          example: "2023-11-01T09:00:00Z"
+
+    Pagination:
+      type: object
+      properties:
+        page:
+          type: integer
+          example: 1
+        limit:
+          type: integer
+          example: 20
+        total:
+          type: integer
+          example: 100
+        pages:
+          type: integer
+          example: 5
+
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+security:
+  - BearerAuth: [ ]

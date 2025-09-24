@@ -1,7 +1,7 @@
 package com.system.config;
 
 import com.system.interceptor.JwtTokenAdminInterceptor;
-import com.system.interceptor.JwtTokenUserInterceptor;
+import com.system.interceptor.JwtTokenStudentInterceptor;
 import com.system.json.JacksonObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,7 +31,7 @@ public class WebMvcConfiguration extends WebMvcConfigurationSupport {
     @Autowired
     private JwtTokenAdminInterceptor jwtTokenAdminInterceptor;
     @Autowired
-    private JwtTokenUserInterceptor jwtTokenUserInterceptor;
+    private JwtTokenStudentInterceptor jwtTokenStudentInterceptor;
 
     /**
      * 注册自定义拦截器
@@ -44,7 +44,7 @@ public class WebMvcConfiguration extends WebMvcConfigurationSupport {
         registry.addInterceptor(jwtTokenAdminInterceptor)
                 .addPathPatterns("/admin/**")
                 .excludePathPatterns("/admin/admin/login");
-        registry.addInterceptor(jwtTokenUserInterceptor)
+        registry.addInterceptor(jwtTokenStudentInterceptor)
                 .addPathPatterns("/user/**")
                 .excludePathPatterns("/user/user/login")
                 .excludePathPatterns("/user/shop/status");

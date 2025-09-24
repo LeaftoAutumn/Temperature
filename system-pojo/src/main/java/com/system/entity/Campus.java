@@ -16,7 +16,7 @@ import java.util.UUID;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Campuses implements Serializable {
+public class Campus implements Serializable {
 
     private static final long serialVersionUID = 1L;
 

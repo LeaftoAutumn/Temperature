@@ -55,8 +55,8 @@ public class User implements Serializable {
 
     @Getter
     public enum Gender {
-        MALE("M", "男"),
-        FEMALE("F", "女");
+        MALE("MALE", "男"),
+        FEMALE("FEMALE", "女");
 
         private final String gender;
         private final String description;

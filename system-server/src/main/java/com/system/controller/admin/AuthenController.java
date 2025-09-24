@@ -2,11 +2,11 @@ package com.system.controller.admin;
 
 import com.system.constant.JwtClaimsConstant;
 import com.system.context.BaseContext;
-import com.system.dto.*;
+import com.system.dto.LoginDTO;
 import com.system.entity.User;
 import com.system.properties.JwtProperties;
 import com.system.result.Result;
-import com.system.service.LoginService;
+import com.system.service.AuthenService;
 import com.system.utils.JwtUtil;
 import com.system.vo.LoginVO;
 import io.swagger.annotations.Api;
@@ -19,21 +19,21 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * 员工管理
+ * 管理员认证
  */
 @RestController
-@RequestMapping("/admin/admin")
+@RequestMapping("/admin/auth")
 @Slf4j
-@Api(tags = "管理员管理")
-public class AdminController {
+@Api(tags = "管理员认证")
+public class AuthenController {
 
     @Autowired
-    private LoginService loginService;
+    private AuthenService authenService;
     @Autowired
     private JwtProperties jwtProperties;
 
     /**
-     * 用户登录
+     * 管理员登录
      *
      * @param loginDTO
      * @return
@@ -43,7 +43,7 @@ public class AdminController {
     public Result<LoginVO> login(@RequestBody LoginDTO loginDTO) {
         log.info("管理员登录：{}", loginDTO);
 
-        User user = loginService.login(loginDTO);
+        User user = authenService.login(loginDTO);
 
         //登录成功后，生成jwt令牌
         Map<String, Object> claims = new HashMap<>();
@@ -59,21 +59,5 @@ public class AdminController {
                 .build();
 
         return Result.success(loginVO);
-    }
-
-    /**
-     * 用户出登录
-     *
-     * @return
-     */
-    @PostMapping("/logout")
-    @ApiOperation("退出登录")
-    public Result<String> logout() {
-        log.info("用户{}退出登录", BaseContext.getCurrentId());
-
-        //清除ThreadLocal中的数据
-        BaseContext.removeCurrentId();
-
-        return Result.success();
     }
 }

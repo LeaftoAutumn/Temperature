@@ -1,0 +1,554 @@
+openapi: 3.0.3
+info:
+  title: 乒乓球培训管理系统 - 月赛管理 API
+  version: 1.0.0
+  description: 月赛管理模块接口文档，包括月赛信息查询、报名、分组、赛程管理等。
+
+servers:
+  - url: https://api.example.com/v1
+    description: 生产环境
+
+tags:
+  - name: Tournaments
+    description: 月赛管理
+
+paths:
+  # 获取月赛列表
+  /tournaments:
+    x-controller: TournamentController
+    get:
+      tags:
+        - Tournaments
+      summary: 获取月赛列表
+      operationId: getTournaments
+      description: 获取所有月赛信息，支持按状态过滤
+      parameters:
+        - name: status
+          in: query
+          description: 月赛状态过滤（upcoming, ongoing, completed）
+          schema:
+            type: string
+            enum: [ upcoming, ongoing, completed ]
+      responses:
+        '200':
+          description: 成功获取月赛列表
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Tournament'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    # 创建月赛（管理员）
+    post:
+      tags:
+        - Tournaments
+      summary: 创建月赛（仅管理员）
+      operationId: createTournament
+      description: 管理员创建新的月赛信息
+      security:
+        - BearerAuth: [ ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TournamentCreate'
+      responses:
+        '201':
+          description: 月赛创建成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Tournament'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  # 获取月赛详情
+  /tournaments/{tournamentId}:
+    x-controller: TournamentController
+    get:
+      tags:
+        - Tournaments
+      summary: 获取月赛详情
+      operationId: getTournamentById
+      description: 根据ID获取月赛的详细信息
+      parameters:
+        - name: tournamentId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: 成功获取月赛信息
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Tournament'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    # 更新月赛信息
+    put:
+      tags:
+        - Tournaments
+      summary: 更新月赛信息（仅管理员）
+      operationId: updateTournament
+      description: 管理员更新月赛信息
+      security:
+        - BearerAuth: [ ]
+      parameters:
+        - name: tournamentId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TournamentUpdate'
+      responses:
+        '200':
+          description: 月赛信息更新成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Tournament'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  # 月赛报名
+  /tournament-registrations:
+    x-controller: TournamentRegistrationController
+    post:
+      tags:
+        - Tournaments
+      summary: 报名月赛
+      operationId: registerForTournament
+      description: 学员报名参加月赛，系统会自动验证余额并扣款
+      security:
+        - BearerAuth: [ ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                tournamentId:
+                  type: string
+                  format: uuid
+                  description: 月赛ID
+              required:
+                - tournamentId
+      responses:
+        '201':
+          description: 报名成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    format: uuid
+                    description: 报名记录ID
+                  message:
+                    type: string
+                    example: 报名成功
+        '400':
+          description: 报名失败（余额不足、已过期、已报名等）
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  # 获取月赛分组信息
+  /tournaments/{tournamentId}/groups:
+    x-controller: TournamentGroupController
+    get:
+      tags:
+        - Tournaments
+      summary: 获取月赛分组情况
+      operationId: getTournamentGroups
+      description: 获取指定月赛的分组信息和赛程安排
+      parameters:
+        - name: tournamentId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: 成功获取分组信息
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TournamentGroup'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  # 获取月赛场次信息
+  /tournaments/{tournamentId}/matches:
+    x-controller: TournamentMatchController
+    get:
+      tags:
+        - Tournaments
+      summary: 获取月赛场次列表
+      operationId: getTournamentMatches
+      description: 获取指定月赛的所有比赛场次及结果
+      parameters:
+        - name: tournamentId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: 成功获取比赛场次
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TournamentMatch'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  # 更新比赛结果
+  /matches/{matchId}:
+    put:
+      tags:
+        - Tournaments
+      summary: 更新比赛结果（仅管理员）
+      operationId: updateMatchResult
+      description: 管理员录入或更新比赛结果
+      security:
+        - BearerAuth: [ ]
+      parameters:
+        - name: matchId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MatchResultUpdate'
+      responses:
+        '200':
+          description: 比赛结果更新成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TournamentMatch'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+components:
+  schemas:
+    Tournament:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: 月赛ID
+          example: "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+        name:
+          type: string
+          description: 月赛名称
+          example: "2024年5月月赛"
+        event_date:
+          type: string
+          format: date
+          description: 比赛日期
+          example: "2024-05-15"
+        group_type:
+          type: string
+          enum: [ A, B, C ]
+          description: 分组类型
+          example: "A"
+        format:
+          type: string
+          enum: [ round_robin, knockout ]
+          description: 赛制
+          example: "round_robin"
+        status:
+          type: string
+          enum: [ upcoming, ongoing, completed ]
+          description: 比赛状态
+          example: "upcoming"
+        entry_fee:
+          type: number
+          format: float
+          description: 报名费
+          example: 50.00
+        created_time:
+          type: string
+          format: date-time
+          description: 创建时间
+          example: "2024-04-01T10:30:00Z"
+
+    TournamentCreate:
+      type: object
+      required:
+        - name
+        - event_date
+        - group_type
+        - format
+        - entry_fee
+      properties:
+        name:
+          type: string
+          example: "2024年5月月赛"
+        event_date:
+          type: string
+          format: date
+          example: "2024-05-15"
+        group_type:
+          type: string
+          enum: [ A, B, C ]
+          example: "A"
+        format:
+          type: string
+          enum: [ round_robin, knockout ]
+          example: "round_robin"
+        entry_fee:
+          type: number
+          format: float
+          example: 50.00
+
+    TournamentUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+        event_date:
+          type: string
+          format: date
+        group_type:
+          type: string
+          enum: [ A, B, C ]
+        format:
+          type: string
+          enum: [ round_robin, knockout ]
+        status:
+          type: string
+          enum: [ upcoming, ongoing, completed ]
+        entry_fee:
+          type: number
+          format: float
+
+    TournamentGroup:
+      type: object
+      properties:
+        group_name:
+          type: string
+          description: 组别名称
+          example: "A组"
+        players:
+          type: array
+          items:
+            $ref: '#/components/schemas/PlayerInfo'
+          description: 该组选手列表
+        matches:
+          type: array
+          items:
+            $ref: '#/components/schemas/TournamentMatch'
+          description: 该组比赛安排
+
+    TournamentMatch:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: 比赛ID
+          example: "b2c3d4e5-f6g7-8901-bcde-f23456789012"
+        tournament_id:
+          type: string
+          format: uuid
+          description: 月赛ID
+          example: "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+        group_name:
+          type: string
+          description: 组别名称
+          example: "A组"
+        player1_id:
+          type: string
+          format: uuid
+          description: 选手1ID
+          example: "c3d4e5f6-g7h8-9012-cdef-345678901234"
+        player2_id:
+          type: string
+          format: uuid
+          description: 选手2ID
+          example: "d4e5f6g7-h8i9-0123-defg-456789012345"
+        player1_name:
+          type: string
+          description: 选手1姓名
+          example: "张三"
+        player2_name:
+          type: string
+          description: 选手2姓名
+          example: "李四"
+        scheduled_time:
+          type: string
+          format: date-time
+          description: 计划比赛时间
+          example: "2024-05-15T10:00:00Z"
+        result:
+          type: string
+          description: 比赛结果（如 3-1）
+          example: "3-1"
+        winner_id:
+          type: string
+          format: uuid
+          description: 获胜者ID
+          example: "c3d4e5f6-g7h8-9012-cdef-345678901234"
+        status:
+          type: string
+          enum: [ scheduled, in_progress, completed ]
+          description: 比赛状态
+          example: "completed"
+
+    MatchResultUpdate:
+      type: object
+      required:
+        - result
+        - winner_id
+        - status
+      properties:
+        result:
+          type: string
+          example: "3-1"
+          description: 比赛结果（如 3-1）
+        winner_id:
+          type: string
+          format: uuid
+          description: 获胜者ID
+          example: "c3d4e5f6-g7h8-9012-cdef-345678901234"
+        status:
+          type: string
+          enum: [ scheduled, in_progress, completed ]
+          example: "completed"
+
+    PlayerInfo:
+      type: object
+      properties:
+        user_id:
+          type: string
+          format: uuid
+          description: 用户ID
+          example: "c3d4e5f6-g7h8-9012-cdef-345678901234"
+        name:
+          type: string
+          description: 姓名
+          example: "张三"
+        gender:
+          type: string
+          enum: [ male, female, other ]
+          example: "male"
+        age:
+          type: integer
+          description: 年龄
+          example: 25
+
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+          description: 错误代码
+          example: "INSUFFICIENT_BALANCE"
+        message:
+          type: string
+          description: 错误信息
+          example: "余额不足"
+        details:
+          type: object
+          description: 错误详情
+
+  responses:
+    BadRequest:
+      description: 请求参数错误
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Unauthorized:
+      description: 未授权访问
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Forbidden:
+      description: 权限不足
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    NotFound:
+      description: 资源未找到
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    InternalServerError:
+      description: 服务器内部错误
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer

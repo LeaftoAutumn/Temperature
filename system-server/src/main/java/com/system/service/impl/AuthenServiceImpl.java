@@ -2,20 +2,43 @@ package com.system.service.impl;
 
 import com.system.constant.MessageConstant;
 import com.system.dto.LoginDTO;
+import com.system.dto.RegisterDTO;
 import com.system.entity.User;
 import com.system.exception.AccountNotFoundException;
 import com.system.exception.PasswordErrorException;
-import com.system.mapper.LoginMapper;
-import com.system.service.LoginService;
+import com.system.mapper.UserMapper;
+import com.system.service.AuthenService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
 
+import java.util.Collections;
+import java.util.List;
+import java.util.UUID;
+
 @Service
-public class LoginServiceImpl implements LoginService {
+public class AuthenServiceImpl implements AuthenService {
 
     @Autowired
-    private LoginMapper loginMapper;
+    private UserMapper userMapper;
+
+    @Override
+    public void register(RegisterDTO registerDTO) {
+        User user = User.builder()
+                .userId(UUID.randomUUID())
+                .username(registerDTO.getUsername())
+                .password(DigestUtils.md5DigestAsHex(registerDTO.getPassword().getBytes()))
+                .name(registerDTO.getName())
+                .gender(User.Gender.valueOf(registerDTO.getGender().toUpperCase()))
+                .birthday(registerDTO.getBirthday())
+                .phoneNumber(registerDTO.getPhoneNumber())
+                .email(registerDTO.getEmail())
+                .campusId(UUID.fromString(registerDTO.getCampusId()))
+                .role(User.Role.valueOf(registerDTO.getRole().toUpperCase()))
+                .build();
+
+        userMapper.createUser(Collections.singletonList(user));
+    }
 
     /**
      * 用户登录
@@ -29,7 +52,7 @@ public class LoginServiceImpl implements LoginService {
         String password = loginDTO.getPassword();
 
         //1、根据用户名查询数据库中的数据
-        User user = loginMapper.getByUsername(username);
+        User user = userMapper.getByUsername(username);
 
         //2、处理各种异常情况（用户名不存在、密码不对、账号被锁定）
         if (user == null) {

@@ -1,0 +1,313 @@
+openapi: 3.0.0
+info:
+  title: 乒乓球培训管理系统 - 认证与授权 API
+  description: |-
+    提供用户登录、注册、获取当前用户信息等功能。
+    密码要求：8-16位，必须包含字母、数字和特殊字符。
+  version: 1.0.0
+
+servers:
+  - url: https://api.example.com/v1
+    description: 生产环境服务器
+
+tags:
+  - name: Authentication
+    description: 用户登录与注册
+    x-controller: AuthController
+
+paths:
+  /auth/login:
+    post:
+      tags: [ Authentication ]
+      summary: 用户登录
+      operationId: login
+      description: 使用用户名和密码登录系统，成功则返回 JWT Token 和用户信息。
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: 登录成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+        '401':
+          description: 用户名或密码错误
+        '500':
+          description: 服务器内部错误
+
+  /auth/register:
+    post:
+      tags: [ Authentication ]
+      summary: 用户注册
+      operationId: register
+      description: |-
+        新用户注册。
+        - 注册学员无需审核。
+        - 注册教练需要校区管理员审核 (`is_approved: false`)。
+        此接口会隐式查询校区列表以验证 `campus_id` 的有效性。
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+      responses:
+        '201':
+          description: 注册成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          description: |-
+            请求参数错误。可能的原因：
+            - 用户名已存在
+            - 手机号已存在
+            - 密码复杂度不符合要求
+            - 校区ID无效
+            - 角色字段错误
+        '500':
+          description: 服务器内部错误
+
+  /auth/me:
+    get:
+      tags: [ Authentication ]
+      summary: 获取当前用户信息
+      operationId: getCurrentUser
+      description: 获取当前登录用户的详细信息，包括其关联的学员或教练扩展信息。
+      security:
+        - BearerAuth: [ ]
+      responses:
+        '200':
+          description: 成功获取用户信息
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserDetail'
+        '401':
+          description: 未授权或 Token 无效
+        '500':
+          description: 服务器内部错误
+
+components:
+  schemas:
+    LoginRequest:
+      type: object
+      required:
+        - username
+        - password
+      properties:
+        username:
+          type: string
+          example: "zhangsan"
+        password:
+          type: string
+          format: password
+          example: "Passw0rd!"
+      description: 登录请求体
+
+    LoginResponse:
+      type: object
+      properties:
+        token:
+          type: string
+          description: JWT Bearer Token，用于后续接口认证
+          example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+        user:
+          $ref: '#/components/schemas/User'
+      description: 登录成功响应体
+
+    RegisterRequest:
+      type: object
+      required:
+        - username
+        - password
+        - name
+        - phone
+        - campus_id
+        - role
+      properties:
+        username:
+          type: string
+          example: "lisi"
+        password:
+          type: string
+          format: password
+          example: "MyPass123!"
+        name:
+          type: string
+          example: "李四"
+        gender:
+          type: string
+          enum: [ male, female, other ]
+          nullable: true
+          example: "male"
+        birth_date:
+          type: string
+          format: date
+          nullable: true
+          example: "2000-01-01"
+        phone:
+          type: string
+          example: "13800138000"
+        email:
+          type: string
+          format: email
+          nullable: true
+          example: "lisi@example.com"
+        campus_id:
+          type: string
+          format: uuid
+          description: 校区ID，必须来自有效的校区列表
+          example: "550e8400-e29b-41d4-a716-446655440000"
+        role:
+          type: string
+          enum: [ student, coach ]
+          description: 注册角色
+          example: "student"
+        # 教练注册专属字段
+        level:
+          type: string
+          enum: [ primary, intermediate, advanced ]
+          nullable: true
+          description: 教练等级（仅当role为coach时有效）
+          example: "intermediate"
+        photo_url:
+          type: string
+          nullable: true
+          description: 教练照片URL（仅当role为coach时有效）
+          example: "/uploads/coaches/photo1.jpg"
+        awards:
+          type: string
+          nullable: true
+          description: 获奖记录（仅当role为coach时有效）
+          example: "全市乒乓球比赛冠军"
+      description: 用户注册请求体
+
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "550e8400-e29b-41d4-a716-446655440001"
+        username:
+          type: string
+          example: "lisi"
+        name:
+          type: string
+          example: "李四"
+        gender:
+          type: string
+          enum: [ male, female, other ]
+          nullable: true
+          example: "male"
+        birth_date:
+          type: string
+          format: date
+          nullable: true
+          example: "2000-01-01"
+        phone:
+          type: string
+          example: "13800138000"
+        email:
+          type: string
+          format: email
+          nullable: true
+          example: "lisi@example.com"
+        campus_id:
+          type: string
+          format: uuid
+          example: "550e8400-e29b-41d4-a716-446655440000"
+        role:
+          type: string
+          enum: [ super_admin, campus_admin, student, coach ]
+          example: "student"
+        create_time:
+          type: string
+          format: date-time
+          example: "2023-10-25T08:30:00Z"
+      description: 用户基础信息
+
+    UserDetail:
+      allOf:
+        - $ref: '#/components/schemas/User'
+        - type: object
+          properties:
+            student_info:
+              $ref: '#/components/schemas/StudentInfo'
+              nullable: true
+            coach_info:
+              $ref: '#/components/schemas/CoachInfo'
+              nullable: true
+      description: 用户详细信息，包含其扩展角色信息（二选一）
+
+    StudentInfo:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "550e8400-e29b-41d4-a716-446655440002"
+        balance:
+          type: number
+          format: float
+          example: 500.00
+        max_coaches:
+          type: integer
+          example: 2
+        cancel_count:
+          type: integer
+          example: 0
+        create_time:
+          type: string
+          format: date-time
+          example: "2023-10-25T08:30:00Z"
+
+    CoachInfo:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "550e8400-e29b-41d4-a716-446655440003"
+        level:
+          type: string
+          enum: [ primary, intermediate, advanced ]
+          example: "intermediate"
+        hourly_rate:
+          type: number
+          format: float
+          example: 150.00
+        photo_url:
+          type: string
+          nullable: true
+          example: "/uploads/coaches/photo1.jpg"
+        awards:
+          type: string
+          nullable: true
+          example: "全市乒乓球比赛冠军"
+        max_students:
+          type: integer
+          example: 20
+        is_approved:
+          type: boolean
+          example: false
+        create_time:
+          type: string
+          format: date-time
+          example: "2023-10-25T08:30:00Z"
+
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+security:
+  - BearerAuth: [ ]

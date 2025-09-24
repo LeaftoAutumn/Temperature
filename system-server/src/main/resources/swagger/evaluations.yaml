@@ -1,0 +1,516 @@
+openapi: 3.0.3
+info:
+  title: 乒乓球培训管理系统 - 评价系统 API
+  version: 1.0.0
+  description: 评价系统模块接口文档，包括待评价课程查询、提交评价等功能。
+
+servers:
+  - url: https://api.example.com/v1
+    description: 生产环境
+
+tags:
+  - name: Evaluations
+    description: 课程评价管理
+    x-controller: EvaluationController
+
+paths:
+  # 获取待评价课程列表
+  /evaluations/pending:
+    get:
+      tags:
+        - Evaluations
+      summary: 获取待评价课程列表
+      operationId: getPendingEvaluations
+      description: 获取当前用户需要评价的课程列表（系统会根据课程完成时间自动生成待评价记录）
+      security:
+        - BearerAuth: [ ]
+      responses:
+        '200':
+          description: 成功获取待评价课程列表
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PendingEvaluation'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  # 提交课程评价
+  /evaluations:
+    post:
+      tags:
+        - Evaluations
+      summary: 提交课程评价
+      operationId: submitEvaluation
+      description: 对某节课程进行评价，评价对象可以是教练或学员
+      security:
+        - BearerAuth: [ ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EvaluationCreate'
+      responses:
+        '201':
+          description: 评价提交成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    format: uuid
+                    description: 评价记录ID
+                    example: "550e8400-e29b-41d4-a716-446655440000"
+                  message:
+                    type: string
+                    example: 评价提交成功
+        '400':
+          description: 评价提交失败（重复评价、课程未完成等）
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  # 获取收到的评价列表
+  /evaluations/received:
+    get:
+      tags:
+        - Evaluations
+      summary: 获取收到的评价列表
+      operationId: getReceivedEvaluations
+      description: 获取当前用户收到的所有评价
+      security:
+        - BearerAuth: [ ]
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+          description: 页码
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+          description: 每页数量
+        - name: rating
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 5
+          description: 按评分筛选
+      responses:
+        '200':
+          description: 成功获取评价列表
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/EvaluationDetail'
+                  pagination:
+                    $ref: '#/components/schemas/Pagination'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  # 获取给出的评价列表
+  /evaluations/given:
+    get:
+      tags:
+        - Evaluations
+      summary: 获取给出的评价列表
+      operationId: getGivenEvaluations
+      description: 获取当前用户给出的所有评价
+      security:
+        - BearerAuth: [ ]
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+          description: 页码
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+          description: 每页数量
+      responses:
+        '200':
+          description: 成功获取评价列表
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/EvaluationDetail'
+                  pagination:
+                    $ref: '#/components/schemas/Pagination'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  # 获取课程的评价详情
+  /courses/{courseId}/evaluations:
+    get:
+      tags:
+        - Evaluations
+      summary: 获取课程评价详情
+      operationId: getCourseEvaluations
+      description: 获取某节课程的所有评价信息
+      security:
+        - BearerAuth: [ ]
+      parameters:
+        - name: courseId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: 课程ID
+      responses:
+        '200':
+          description: 成功获取课程评价
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  course_info:
+                    $ref: '#/components/schemas/CourseBasicInfo'
+                  evaluations:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/EvaluationDetail'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  # 获取评价统计信息
+  /evaluations/stats:
+    get:
+      tags:
+        - Evaluations
+      summary: 获取评价统计信息
+      operationId: getEvaluationStats
+      description: 获取当前用户的评价统计信息（平均分、评价数量等）
+      security:
+        - BearerAuth: [ ]
+      responses:
+        '200':
+          description: 成功获取统计信息
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EvaluationStats'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+components:
+  schemas:
+    PendingEvaluation:
+      type: object
+      properties:
+        course_id:
+          type: string
+          format: uuid
+          description: 课程ID
+          example: "550e8400-e29b-41d4-a716-446655440001"
+        course_date:
+          type: string
+          format: date-time
+          description: 课程时间
+          example: "2023-11-01T10:00:00Z"
+        opponent_id:
+          type: string
+          format: uuid
+          description: 对方用户ID（被评价人）
+          example: "550e8400-e29b-41d4-a716-446655440002"
+        opponent_name:
+          type: string
+          description: 对方姓名
+          example: "王教练"
+        opponent_role:
+          type: string
+          enum: [ student, coach ]
+          description: 对方角色
+          example: "coach"
+        course_duration:
+          type: integer
+          description: 课程时长（分钟）
+          example: 60
+        table_number:
+          type: integer
+          description: 球桌编号
+          example: 3
+
+    EvaluationCreate:
+      type: object
+      required:
+        - course_id
+        - to_user_id
+        - rating
+        - content
+      properties:
+        course_id:
+          type: string
+          format: uuid
+          description: 课程ID
+          example: "550e8400-e29b-41d4-a716-446655440001"
+        to_user_id:
+          type: string
+          format: uuid
+          description: 被评价用户ID
+          example: "550e8400-e29b-41d4-a716-446655440002"
+        rating:
+          type: integer
+          minimum: 1
+          maximum: 5
+          description: 评分（1-5分）
+          example: 5
+        content:
+          type: string
+          description: 评价内容
+          maxLength: 500
+          example: "教练教得很好，很有耐心"
+
+    EvaluationDetail:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: 评价ID
+          example: "550e8400-e29b-41d4-a716-446655440003"
+        course_id:
+          type: string
+          format: uuid
+          description: 课程ID
+          example: "550e8400-e29b-41d4-a716-446655440001"
+        from_user_id:
+          type: string
+          format: uuid
+          description: 评价人ID
+          example: "550e8400-e29b-41d4-a716-446655440004"
+        from_user_name:
+          type: string
+          description: 评价人姓名
+          example: "张三"
+        from_user_role:
+          type: string
+          enum: [ student, coach ]
+          description: 评价人角色
+          example: "student"
+        to_user_id:
+          type: string
+          format: uuid
+          description: 被评价人ID
+          example: "550e8400-e29b-41d4-a716-446655440002"
+        to_user_name:
+          type: string
+          description: 被评价人姓名
+          example: "王教练"
+        to_user_role:
+          type: string
+          enum: [ student, coach ]
+          description: 被评价人角色
+          example: "coach"
+        rating:
+          type: integer
+          description: 评分
+          example: 5
+        content:
+          type: string
+          description: 评价内容
+          example: "教练教得很好，很有耐心"
+        create_time:
+          type: string
+          format: date-time
+          description: 评价时间
+          example: "2023-11-01T14:30:00Z"
+        course_info:
+          $ref: '#/components/schemas/CourseBasicInfo'
+
+    CourseBasicInfo:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: 课程ID
+          example: "550e8400-e29b-41d4-a716-446655440001"
+        start_time:
+          type: string
+          format: date-time
+          description: 开始时间
+          example: "2023-11-01T10:00:00Z"
+        end_time:
+          type: string
+          format: date-time
+          description: 结束时间
+          example: "2023-11-01T11:00:00Z"
+        table_number:
+          type: integer
+          description: 球桌编号
+          example: 3
+        status:
+          type: string
+          enum: [ pending, confirmed, cancelled, completed ]
+          description: 课程状态
+          example: "completed"
+
+    EvaluationStats:
+      type: object
+      properties:
+        total_received:
+          type: integer
+          description: 收到的评价总数
+          example: 15
+        average_rating:
+          type: number
+          format: float
+          minimum: 0
+          maximum: 5
+          description: 平均评分
+          example: 4.8
+        rating_distribution:
+          type: object
+          properties:
+            "1":
+              type: integer
+              description: 1星评价数量
+              example: 0
+            "2":
+              type: integer
+              description: 2星评价数量
+              example: 0
+            "3":
+              type: integer
+              description: 3星评价数量
+              example: 1
+            "4":
+              type: integer
+              description: 4星评价数量
+              example: 2
+            "5":
+              type: integer
+              description: 5星评价数量
+              example: 12
+        last_evaluation_time:
+          type: string
+          format: date-time
+          description: 最近评价时间
+          example: "2023-11-01T14:30:00Z"
+
+    Pagination:
+      type: object
+      properties:
+        current_page:
+          type: integer
+          description: 当前页码
+          example: 1
+        total_pages:
+          type: integer
+          description: 总页数
+          example: 5
+        total_items:
+          type: integer
+          description: 总记录数
+          example: 100
+        has_next:
+          type: boolean
+          description: 是否有下一页
+          example: true
+        has_prev:
+          type: boolean
+          description: 是否有上一页
+          example: false
+
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+          description: 错误代码
+          example: "EVALUATION_ALREADY_EXISTS"
+        message:
+          type: string
+          description: 错误信息
+          example: "您已经评价过该课程"
+        details:
+          type: object
+          description: 错误详情
+
+  responses:
+    BadRequest:
+      description: 请求参数错误
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Unauthorized:
+      description: 未授权访问
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Forbidden:
+      description: 权限不足
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    NotFound:
+      description: 资源未找到
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    InternalServerError:
+      description: 服务器内部错误
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer

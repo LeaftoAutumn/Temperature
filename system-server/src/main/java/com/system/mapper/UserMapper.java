@@ -4,8 +4,17 @@ import com.system.entity.User;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
 
+import java.util.List;
+
 @Mapper
-public interface LoginMapper {
+public interface UserMapper {
+
+    /**
+     * 新增用户
+     *
+     * @param userList 用户列表
+     */
+    void createUser(List<User> userList);
 
     /**
      * 根据用户名查询用户

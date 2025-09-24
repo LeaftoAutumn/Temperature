@@ -5,7 +5,6 @@ import com.system.context.BaseContext;
 import com.system.properties.JwtProperties;
 import com.system.utils.JwtUtil;
 import io.jsonwebtoken.Claims;
-import lombok.extern.java.Log;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -20,7 +19,7 @@ import javax.servlet.http.HttpServletResponse;
  */
 @Component
 @Slf4j
-public class JwtTokenAdminInterceptor implements HandlerInterceptor {
+public class JwtTokenStudentInterceptor implements HandlerInterceptor {
 
     @Autowired
     private JwtProperties jwtProperties;
@@ -43,17 +42,17 @@ public class JwtTokenAdminInterceptor implements HandlerInterceptor {
         }
 
         //1、从请求头中获取令牌
-        String token = request.getHeader(jwtProperties.getAdminTokenName());
+        String token = request.getHeader(jwtProperties.getUserTokenName());
 
         //2、校验令牌
         try {
             log.info("jwt校验:{}", token);
-            Claims claims = JwtUtil.parseJWT(jwtProperties.getAdminSecretKey(), token);
-            Long adminId = Long.valueOf(claims.get(JwtClaimsConstant.ADMIN_ID).toString());
-            log.info("当前管理员id：{}", adminId);
+            Claims claims = JwtUtil.parseJWT(jwtProperties.getUserSecretKey(), token);
+            Long userId = Long.valueOf(claims.get(JwtClaimsConstant.STUDENT_ID).toString());
+            log.info("当前用户id：{}", userId);
 
-            //将当前管理员id存入ThreadLocal中
-            BaseContext.setCurrentId(adminId);
+            //将当前用户id存入ThreadLocal中
+            BaseContext.setCurrentId(userId);
 
             //3、通过，放行
             return true;

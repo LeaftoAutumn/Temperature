@@ -1,0 +1,591 @@
+openapi: 3.0.0
+info:
+  title: 乒乓球培训管理系统 - 用户信息与匹配 API
+  description: |-
+    提供教练查询、教练详情查看、双选申请与管理等功能。
+    学员可以通过这些接口选择心仪的教练。
+  version: 1.0.0
+
+servers:
+  - url: https://api.example.com/v1
+    description: 生产环境服务器
+
+tags:
+  - name: Users & Matching
+    description: 用户信息查询与教练学员匹配管理
+
+paths:
+  x-controller: CoachController
+  /coaches:
+    get:
+      tags: [ Users & Matching ]
+      summary: 查询教练列表
+      operationId: listCoaches
+      description: |-
+        根据条件查询教练列表。支持按校区、姓名、性别、年龄等条件筛选。
+        默认只返回已通过审核的教练。
+      parameters:
+        - name: campusId
+          in: query
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: 校区ID
+        - name: name
+          in: query
+          schema:
+            type: string
+          description: 教练姓名（模糊匹配）
+        - name: gender
+          in: query
+          schema:
+            type: string
+            enum: [ male, female, other ]
+          description: 性别筛选
+        - name: minAge
+          in: query
+          schema:
+            type: integer
+            minimum: 0
+          description: 最小年龄
+        - name: maxAge
+          in: query
+          schema:
+            type: integer
+            minimum: 0
+          description: 最大年龄
+        - name: level
+          in: query
+          schema:
+            type: string
+            enum: [ primary, intermediate, advanced ]
+          description: 教练等级筛选
+        - name: isApproved
+          in: query
+          schema:
+            type: boolean
+            default: true
+          description: 是否只返回已审核通过的教练
+        - name: page
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+          description: 页码
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+          description: 每页数量
+      responses:
+        '200':
+          description: 成功获取教练列表
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  coaches:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/CoachListItem'
+                  pagination:
+                    $ref: '#/components/schemas/Pagination'
+        '400':
+          description: 请求参数错误
+        '500':
+          description: 服务器内部错误
+      security: [ ]
+
+  /coaches/{coachId}:
+    x-controller: CoachController
+    get:
+      tags: [ Users & Matching ]
+      summary: 获取教练详细信息
+      operationId: getCoachDetail
+      description: 获取指定教练的详细信息，包括获奖记录等。
+      parameters:
+        - name: coachId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: 教练ID
+      responses:
+        '200':
+          description: 成功获取教练信息
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CoachDetail'
+        '404':
+          description: 教练不存在或未通过审核
+        '500':
+          description: 服务器内部错误
+      security: [ ]
+
+  /coach-match-requests:
+    x-controller: MatchRequestController
+    post:
+      tags: [ Users & Matching ]
+      summary: 发送双选申请
+      operationId: createMatchRequest
+      description: |-
+        学员向指定教练发送双选申请。
+        系统会检查学员当前已匹配教练数量是否已达上限（2个）。
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - studentId
+                - coachId
+              properties:
+                studentId:
+                  type: string
+                  format: uuid
+                  description: 学员ID
+                  example: "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+                coachId:
+                  type: string
+                  format: uuid
+                  description: 教练ID
+                  example: "b2c3d4e5-f6g7-8901-bcde-f23456789012"
+      responses:
+        '201':
+          description: 申请发送成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MatchRequest'
+        '400':
+          description: |-
+            申请失败。可能的原因：
+            - 学员已匹配教练数量已达上限
+            - 已经向该教练发送过申请
+        '404':
+          description: 学员或教练不存在
+        '500':
+          description: 服务器内部错误
+      security:
+        - BearerAuth: [ ]
+
+    get:
+      tags: [ Users & Matching ]
+      summary: 获取匹配申请列表
+      operationId: listMatchRequests
+      description: |-
+        获取当前用户的匹配申请列表。
+        - 学员可以查看自己发出的所有申请
+        - 教练可以查看所有指向自己的申请
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [ pending, accepted, rejected ]
+          description: 按状态过滤申请
+        - name: page
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+          description: 页码
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+          description: 每页数量
+      responses:
+        '200':
+          description: 成功获取申请列表
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  requests:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/MatchRequestDetail'
+                  pagination:
+                    $ref: '#/components/schemas/Pagination'
+        '401':
+          description: 未授权
+        '500':
+          description: 服务器内部错误
+      security:
+        - BearerAuth: [ ]
+
+  /coach-match-requests/{requestId}:
+    x-controller: MatchRequestController
+    parameters:
+      - name: requestId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: 匹配申请ID
+
+    put:
+      tags: [ Users & Matching ]
+      summary: 处理匹配申请
+      operationId: updateMatchRequest
+      description: |-
+        教练处理学员的双选申请（接受或拒绝）。
+        接受申请后会建立正式的教练-学员关系。
+        处理结果会通过系统通知发送给学员。
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - status
+              properties:
+                status:
+                  type: string
+                  enum: [ accepted, rejected ]
+                  description: 处理结果
+                  example: "accepted"
+      responses:
+        '200':
+          description: 处理成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MatchRequest'
+        '400':
+          description: |-
+            处理失败。可能的原因：
+            - 教练已接收学员数量已达上限
+            - 申请已被处理过
+        '401':
+          description: 未授权
+        '403':
+          description: 无权处理此申请
+        '404':
+          description: 申请不存在
+        '500':
+          description: 服务器内部错误
+      security:
+        - BearerAuth: [ ]
+
+  /students/{studentId}/coaches:
+    x-controller: StudentCoachController
+    get:
+      tags: [ Users & Matching ]
+      summary: 获取学员的已匹配教练列表
+      operationId: listStudentCoaches
+      description: 获取指定学员已建立匹配关系的教练列表。
+      parameters:
+        - name: studentId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: 学员ID
+      responses:
+        '200':
+          description: 成功获取教练列表
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CoachListItem'
+        '404':
+          description: 学员不存在
+        '500':
+          description: 服务器内部错误
+      security:
+        - BearerAuth: [ ]
+
+  /coaches/{coachId}/students:
+    get:
+      tags: [ Users & Matching ]
+      summary: 获取教练的已接收学员列表
+      operationId: listCoachStudents
+      description: 获取指定教练已建立匹配关系的学员列表。
+      parameters:
+        - name: coachId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: 教练ID
+      responses:
+        '200':
+          description: 成功获取学员列表
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/StudentListItem'
+        '404':
+          description: 教练不存在
+        '500':
+          description: 服务器内部错误
+      security:
+        - BearerAuth: [ ]
+
+  /coach-change-requests:
+    x-controller: CoachChangeController
+    post:
+      tags: [ Users & Matching ]
+      summary: 发起更换教练请求
+      operationId: createCoachChangeRequest
+      description: |-
+        学员发起更换教练请求。
+        系统会通知原教练、新教练和校区管理员。
+        需要三方确认后才能完成更换。
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - studentId
+                - currentCoachId
+                - newCoachId
+              properties:
+                studentId:
+                  type: string
+                  format: uuid
+                  description: 学员ID
+                  example: "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+                currentCoachId:
+                  type: string
+                  format: uuid
+                  description: 当前教练ID
+                  example: "b2c3d4e5-f6g7-8901-bcde-f23456789012"
+                newCoachId:
+                  type: string
+                  format: uuid
+                  description: 新教练ID
+                  example: "c3d4e5f6-g7h8-9012-cdef-345678901234"
+                reason:
+                  type: string
+                  description: 更换原因
+                  example: "时间安排冲突"
+      responses:
+        '201':
+          description: 更换请求提交成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CoachChangeRequest'
+        '400':
+          description: |-
+            请求失败。可能的原因：
+            - 学员与新教练未建立双选关系
+            - 新教练已接收学员数量已达上限
+        '404':
+          description: 学员或教练不存在
+        '500':
+          description: 服务器内部错误
+      security:
+        - BearerAuth: [ ]
+
+components:
+  schemas:
+    CoachListItem:
+      type: object
+      properties:
+        userId:
+          type: string
+          format: uuid
+          example: "b2c3d4e5-f6g7-8901-bcde-f23456789012"
+        name:
+          type: string
+          example: "王教练"
+        gender:
+          type: string
+          enum: [ male, female, other ]
+          nullable: true
+          example: "male"
+        age:
+          type: integer
+          nullable: true
+          example: 35
+        level:
+          type: string
+          enum: [ primary, intermediate, advanced ]
+          example: "intermediate"
+        hourlyRate:
+          type: number
+          format: float
+          example: 150.00
+        photoUrl:
+          type: string
+          nullable: true
+          example: "/uploads/coaches/201.jpg"
+        awards:
+          type: string
+          nullable: true
+          example: "全国乒乓球锦标赛前三名"
+
+    CoachDetail:
+      allOf:
+        - $ref: '#/components/schemas/CoachListItem'
+        - type: object
+          properties:
+            phone:
+              type: string
+              example: "13900139000"
+            email:
+              type: string
+              format: email
+              nullable: true
+              example: "coach.wang@example.com"
+            maxStudents:
+              type: integer
+              example: 20
+            currentStudents:
+              type: integer
+              example: 15
+            isApproved:
+              type: boolean
+              example: true
+            createdTime:
+              type: string
+              format: date-time
+              example: "2023-09-10T10:00:00Z"
+
+    MatchRequest:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "d4e5f6g7-h8i9-0123-defg-456789012345"
+        studentId:
+          type: string
+          format: uuid
+          example: "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+        coachId:
+          type: string
+          format: uuid
+          example: "b2c3d4e5-f6g7-8901-bcde-f23456789012"
+        status:
+          type: string
+          enum: [ pending, accepted, rejected ]
+          example: "pending"
+        createdTime:
+          type: string
+          format: date-time
+          example: "2023-10-27T14:30:00Z"
+        updatedTime:
+          type: string
+          format: date-time
+          example: "2023-10-27T14:30:00Z"
+
+    MatchRequestDetail:
+      allOf:
+        - $ref: '#/components/schemas/MatchRequest'
+        - type: object
+          properties:
+            studentName:
+              type: string
+              example: "张三"
+            coachName:
+              type: string
+              example: "王教练"
+
+    StudentListItem:
+      type: object
+      properties:
+        userId:
+          type: string
+          format: uuid
+          example: "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+        name:
+          type: string
+          example: "张三"
+        gender:
+          type: string
+          enum: [ male, female, other ]
+          nullable: true
+          example: "male"
+        age:
+          type: integer
+          nullable: true
+          example: 18
+        phone:
+          type: string
+          example: "13800138000"
+
+    CoachChangeRequest:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "e5f6g7h8-i9j0-1234-efgh-567890123456"
+        studentId:
+          type: string
+          format: uuid
+          example: "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+        currentCoachId:
+          type: string
+          format: uuid
+          example: "b2c3d4e5-f6g7-8901-bcde-f23456789012"
+        newCoachId:
+          type: string
+          format: uuid
+          example: "c3d4e5f6-g7h8-9012-cdef-345678901234"
+        status:
+          type: string
+          enum: [ pending, approved, rejected ]
+          example: "pending"
+        reason:
+          type: string
+          nullable: true
+          example: "时间安排冲突"
+        createdTime:
+          type: string
+          format: date-time
+          example: "2023-10-28T09:45:00Z"
+
+    Pagination:
+      type: object
+      properties:
+        page:
+          type: integer
+          example: 1
+        limit:
+          type: integer
+          example: 20
+        total:
+          type: integer
+          example: 100
+        pages:
+          type: integer
+          example: 5
+
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+security:
+  - BearerAuth: [ ]

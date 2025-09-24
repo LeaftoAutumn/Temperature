@@ -1,0 +1,487 @@
+openapi: 3.0.0
+info:
+  title: 乒乓球培训管理系统 - 支付与账户 API
+  description: |-
+    提供账户余额查询、充值、支付回调、线下充值记录等功能。
+    支持微信、支付宝在线支付和线下支付两种方式。
+  version: 1.0.0
+
+servers:
+  - url: https://api.example.com/v1
+    description: 生产环境服务器
+
+tags:
+  - name: Payment & Wallet
+    description: 支付与账户管理
+    x-controller: PaymentWalletController
+
+paths:
+  /students/{studentId}/balance:
+    get:
+      tags: [ Payment & Wallet ]
+      summary: 获取学员账户余额
+      operationId: getStudentBalance
+      description: 获取指定学员的账户余额信息。
+      parameters:
+        - name: studentId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: 学员ID
+      responses:
+        '200':
+          description: 成功获取余额信息
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  balance:
+                    type: number
+                    format: float
+                    example: 500.00
+                  studentId:
+                    type: string
+                    format: uuid
+                    example: "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+                  studentName:
+                    type: string
+                    example: "张三"
+        '401':
+          description: 未授权
+        '403':
+          description: 无权查看他人余额
+        '404':
+          description: 学员不存在
+        '500':
+          description: 服务器内部错误
+      security:
+        - BearerAuth: [ ]
+
+  /top-ups:
+    post:
+      tags: [ Payment & Wallet ]
+      summary: 发起充值订单
+      operationId: createTopUpOrder
+      description: |-
+        学员发起充值订单，生成支付信息。
+        支持微信和支付宝两种在线支付方式。
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - studentId
+                - amount
+                - method
+              properties:
+                studentId:
+                  type: string
+                  format: uuid
+                  description: 学员ID
+                  example: "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+                amount:
+                  type: number
+                  format: float
+                  minimum: 0.01
+                  description: 充值金额
+                  example: 200.00
+                method:
+                  type: string
+                  enum: [ wechat, alipay ]
+                  description: 支付方式
+                  example: "wechat"
+      responses:
+        '201':
+          description: 充值订单创建成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TopUpOrder'
+        '400':
+          description: 请求参数错误
+        '401':
+          description: 未授权
+        '500':
+          description: 服务器内部错误
+      security:
+        - BearerAuth: [ ]
+
+  /payments/notify/{gateway}:
+    post:
+      tags: [ Payment & Wallet ]
+      summary: 支付回调通知
+      operationId: handlePaymentNotification
+      description: |-
+        接收第三方支付平台（微信/支付宝）的支付结果异步通知。
+        此接口由支付平台调用，用于更新订单状态和账户余额。
+      parameters:
+        - name: gateway
+          in: path
+          required: true
+          schema:
+            type: string
+            enum: [ wechat, alipay ]
+          description: 支付网关类型
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                # 微信支付回调参数示例
+                return_code:
+                  type: string
+                  example: "SUCCESS"
+                return_msg:
+                  type: string
+                  example: "OK"
+                result_code:
+                  type: string
+                  example: "SUCCESS"
+                out_trade_no:
+                  type: string
+                  example: "20231101123456"
+                transaction_id:
+                  type: string
+                  example: "4200001234567890"
+                total_fee:
+                  type: integer
+                  example: 20000
+          application/json:
+            schema:
+              type: object
+              properties:
+                # 支付宝支付回调参数示例
+                notify_type:
+                  type: string
+                  example: "trade_status_sync"
+                notify_id:
+                  type: string
+                  example: "1234567890"
+                trade_no:
+                  type: string
+                  example: "20231101123456"
+                trade_status:
+                  type: string
+                  example: "TRADE_SUCCESS"
+                total_amount:
+                  type: number
+                  format: float
+                  example: 200.00
+      responses:
+        '200':
+          description: 处理成功
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "SUCCESS"
+        '400':
+          description: 回调参数错误
+        '500':
+          description: 服务器内部错误
+      security: [ ]
+      x-internal: true
+
+  /offline-top-ups:
+    post:
+      tags: [ Payment & Wallet ]
+      summary: 录入线下充值记录
+      operationId: createOfflineTopUp
+      description: |-
+        校区管理员录入线下充值记录。
+        需要管理员权限。
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - studentId
+                - amount
+                - operatorId
+              properties:
+                studentId:
+                  type: string
+                  format: uuid
+                  description: 学员ID
+                  example: "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+                amount:
+                  type: number
+                  format: float
+                  minimum: 0.01
+                  description: 充值金额
+                  example: 300.00
+                operatorId:
+                  type: string
+                  format: uuid
+                  description: 操作员（管理员）ID
+                  example: "b2c3d4e5-f6g7-8901-bcde-f23456789012"
+                remark:
+                  type: string
+                  description: 备注信息
+                  example: "现金支付"
+      responses:
+        '201':
+          description: 线下充值记录创建成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentRecord'
+        '400':
+          description: 请求参数错误
+        '401':
+          description: 未授权
+        '403':
+          description: 权限不足（非管理员）
+        '500':
+          description: 服务器内部错误
+      security:
+        - BearerAuth: [ ]
+
+  /payments:
+    get:
+      tags: [ Payment & Wallet ]
+      summary: 获取支付记录列表
+      operationId: getPaymentRecords
+      description: |-
+        获取当前用户的支付记录列表。
+        学员可以看到自己的支付记录，管理员可以看到所有记录。
+      parameters:
+        - name: type
+          in: query
+          schema:
+            type: string
+            enum: [ topup, course, tournament, refund ]
+          description: 按支付类型过滤
+        - name: method
+          in: query
+          schema:
+            type: string
+            enum: [ wechat, alipay, offline ]
+          description: 按支付方式过滤
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [ pending, completed, failed ]
+          description: 按支付状态过滤
+        - name: startDate
+          in: query
+          schema:
+            type: string
+            format: date
+          description: 开始日期 (YYYY-MM-DD)
+        - name: endDate
+          in: query
+          schema:
+            type: string
+            format: date
+          description: 结束日期 (YYYY-MM-DD)
+        - name: page
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+          description: 页码
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+          description: 每页数量
+      responses:
+        '200':
+          description: 成功获取支付记录
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  payments:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/PaymentRecord'
+                  pagination:
+                    $ref: '#/components/schemas/Pagination'
+        '401':
+          description: 未授权
+        '500':
+          description: 服务器内部错误
+      security:
+        - BearerAuth: [ ]
+
+  /payments/{paymentId}:
+    get:
+      tags: [ Payment & Wallet ]
+      summary: 获取支付记录详情
+      operationId: getPaymentRecordDetail
+      description: 获取指定支付记录的详细信息。
+      parameters:
+        - name: paymentId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: 支付记录ID
+      responses:
+        '200':
+          description: 成功获取支付记录详情
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentRecordDetail'
+        '401':
+          description: 未授权
+        '403':
+          description: 无权查看此记录
+        '404':
+          description: 支付记录不存在
+        '500':
+          description: 服务器内部错误
+      security:
+        - BearerAuth: [ ]
+
+components:
+  schemas:
+    TopUpOrder:
+      type: object
+      x-class-name: TopUpOrder
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "c3d4e5f6-g7h8-9012-cdef-345678901234"
+        orderNo:
+          type: string
+          example: "TOP20231101123456"
+        studentId:
+          type: string
+          format: uuid
+          example: "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+        amount:
+          type: number
+          format: float
+          example: 200.00
+        method:
+          type: string
+          enum: [ wechat, alipay ]
+          example: "wechat"
+        status:
+          type: string
+          enum: [ pending, completed, failed ]
+          example: "pending"
+        qrCodeUrl:
+          type: string
+          nullable: true
+          description: 支付二维码URL（在线支付时返回）
+          example: "https://api.example.com/qrcode/123456"
+        createdTime:
+          type: string
+          format: date-time
+          example: "2023-11-01T10:30:00Z"
+
+    PaymentRecord:
+      type: object
+      x-class-name: PaymentRecord
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "d4e5f6g7-h8i9-0123-defg-456789012345"
+        userId:
+          type: string
+          format: uuid
+          example: "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+        relatedId:
+          type: string
+          format: uuid
+          nullable: true
+          description: 关联ID（课程ID、月赛ID等）
+          example: "e5f6g7h8-i9j0-1234-efgh-567890123456"
+        amount:
+          type: number
+          format: float
+          example: 150.00
+        type:
+          type: string
+          enum: [ topup, course, tournament, refund ]
+          example: "course"
+        method:
+          type: string
+          enum: [ wechat, alipay, offline ]
+          example: "wechat"
+        status:
+          type: string
+          enum: [ pending, completed, failed ]
+          example: "completed"
+        createdTime:
+          type: string
+          format: date-time
+          example: "2023-11-01T11:00:00Z"
+
+    PaymentRecordDetail:
+      x-class-name: PaymentRecordDetail
+      allOf:
+        - $ref: '#/components/schemas/PaymentRecord'
+        - type: object
+          properties:
+            userName:
+              type: string
+              example: "张三"
+            relatedInfo:
+              type: object
+              nullable: true
+              description: 关联信息详情
+              properties:
+                type:
+                  type: string
+                  example: "course"
+                title:
+                  type: string
+                  example: "乒乓球课程"
+                time:
+                  type: string
+                  format: date-time
+                  example: "2023-11-01T10:00:00Z"
+            operatorName:
+              type: string
+              nullable: true
+              example: "李管理员"
+
+    Pagination:
+      type: object
+      x-class-name: Pagination
+      properties:
+        page:
+          type: integer
+          example: 1
+        limit:
+          type: integer
+          example: 20
+        total:
+          type: integer
+          example: 100
+        pages:
+          type: integer
+          example: 5
+
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+security:
+  - BearerAuth: [ ]
