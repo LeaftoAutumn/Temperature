@@ -7,38 +7,40 @@ import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
+/**
+ * 校区信息
+ */
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Category implements Serializable {
+public class Campuses implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private Long id;
+    // 校区ID
+    private UUID campusId;
 
-    //类型: 1菜品分类 2套餐分类
-    private Integer type;
-
-    //分类名称
+    // 校区名称
     private String name;
 
-    //顺序
-    private Integer sort;
+    // 校区地址
+    private String address;
 
-    //分类状态 0标识禁用 1表示启用
-    private Integer status;
+    // 校区联系电话
+    private String phone;
 
-    //创建时间
+    // 是否为中心校区
+    private Boolean center;
+
+    // 创建时间
     private LocalDateTime createTime;
 
-    //更新时间
+    // 更新时间
     private LocalDateTime updateTime;
 
-    //创建人
-    private Long createUser;
-
-    //修改人
-    private Long updateUser;
+    // 是否逻辑删除
+    private Boolean deleted;
 }

@@ -1,7 +1,5 @@
 package com.sky.vo;
 
-import com.sky.entity.OrderDetail;
-import com.sky.entity.Orders;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
