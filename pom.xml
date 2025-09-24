@@ -20,6 +20,7 @@
     <properties>
         <mybatis.spring>2.2.0</mybatis.spring>
         <lombok>1.18.20</lombok>
+        <logback>1.5.18</logback>
         <fastjson>1.2.76</fastjson>
         <commons.lang>2.6</commons.lang>
         <druid>1.2.1</druid>
