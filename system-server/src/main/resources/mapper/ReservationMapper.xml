@@ -12,31 +12,31 @@
         <result column="status" property="status"/>
         <result column="create_time" property="createTime"/>
         <result column="update_time" property="updateTime"/>
-        <result column="delete_flag" property="deleted"/>
+        <result column="deleted" property="deleted"/>
     </resultMap>
 
     <insert id="insertReservation">
-        INSERT INTO reservations (id, course_id, student_id, coach_id, action, status, create_time, update_time, delete_flag)
+        INSERT INTO reservation (id, course_id, student_id, coach_id, action, status, create_time, update_time, deleted)
         VALUES (#{id}, #{courseId}, #{studentId}, #{coachId}, #{action}, #{status}, #{createTime}, #{updateTime}, #{deleted})
     </insert>
 
     <select id="selectById" resultMap="ReservationMap">
-        SELECT * FROM reservations WHERE id = #{id} AND delete_flag = 0
+        SELECT * FROM reservation WHERE id = #{id} AND deleted = 0
     </select>
 
-    <update id="updateReservationStatus">
-        UPDATE reservations
+    <update id="updatereservationtatus">
+        UPDATE reservation
         SET status = #{status}, update_time = NOW()
-        WHERE id = #{id} AND delete_flag = 0
+        WHERE id = #{id} AND deleted = 0
     </update>
 
     <select id="existsCoachStudentMatch" resultType="boolean">
         SELECT COUNT(1) > 0
-        FROM coach_student_matches
+        FROM coach_student_match
         WHERE student_id = #{studentId}
           AND coach_id = #{coachId}
           AND status = 'accepted'
-          AND delete_flag = 0
+          AND deleted = 0
     </select>
 
 </mapper>

@@ -16,39 +16,39 @@
         <result column="role" property="role"/>
         <result column="create_time" property="createTime"/>
         <result column="update_time" property="updateTime"/>
-        <result column="delete_flag" property="deleted"/>
+        <result column="deleted" property="deleted"/>
     </resultMap>
 
     <select id="selectByUsername" resultMap="UserMap">
         SELECT * FROM user
-        WHERE username = #{username} AND delete_flag = 0
+        WHERE username = #{username} AND deleted = 0
     </select>
 
     <select id="selectById" resultMap="UserMap">
         SELECT * FROM user
-        WHERE id = #{id} AND delete_flag = 0
+        WHERE id = #{id} AND deleted = 0
     </select>
 
     <insert id="insertUser">
-        INSERT INTO user (id, username, password_hash, name, gender, birth_date, phone, email, campus_id, role, create_time, update_time, delete_flag)
+        INSERT INTO user (id, username, password_hash, name, gender, birth_date, phone, email, campus_id, role, create_time, update_time, deleted)
         VALUES (#{id}, #{username}, #{passwordHash}, #{name}, #{gender}, #{birthDate}, #{phone}, #{email}, #{campusId}, #{role}, #{createTime}, #{updateTime}, #{deleted})
     </insert>
 
     <select id="existsByUsername" resultType="boolean">
         SELECT COUNT(1) > 0
         FROM user
-        WHERE username = #{username} AND delete_flag = 0
+        WHERE username = #{username} AND deleted = 0
     </select>
 
     <select id="existsByPhone" resultType="boolean">
         SELECT COUNT(1) > 0
         FROM user
-        WHERE phone = #{phone} AND delete_flag = 0
+        WHERE phone = #{phone} AND deleted = 0
     </select>
 
     <select id="selectUsersByCampusId" resultMap="UserMap">
         SELECT * FROM user
-        WHERE campus_id = #{campusId} AND delete_flag = 0
+        WHERE campus_id = #{campusId} AND deleted = 0
         ORDER BY create_time DESC
     </select>
 
@@ -63,7 +63,7 @@
             campus_id = #{campusId},
             role = #{role},
             update_time = #{updateTime}
-        WHERE id = #{id} AND delete_flag = 0
+        WHERE id = #{id} AND deleted = 0
     </update>
 
 </mapper>

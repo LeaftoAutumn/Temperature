@@ -15,7 +15,7 @@
         <result column="status" property="status"/>
         <result column="create_time" property="createTime"/>
         <result column="update_time" property="updateTime"/>
-        <result column="delete_flag" property="deleted"/>
+        <result column="deleted" property="deleted"/>
     </resultMap>
 
     <resultMap id="TournamentMatchVOMap" type="com.system.vo.TournamentMatchVO">
@@ -48,25 +48,25 @@
     </resultMap>
 
     <insert id="insertMatch">
-        INSERT INTO tournament_matches (id, tournament_id, group_name, player1_id, player2_id,
+        INSERT INTO tournament_match (id, tournament_id, group_name, player1_id, player2_id,
                                         scheduled_time, result, winner_id, status,
-                                        create_time, update_time, delete_flag)
+                                        create_time, update_time, deleted)
         VALUES (#{id}, #{tournamentId}, #{groupName}, #{player1Id}, #{player2Id},
                 #{scheduledTime}, #{result}, #{winnerId}, #{status},
                 #{createTime}, #{updateTime}, #{deleted})
     </insert>
 
     <select id="selectById" resultMap="TournamentMatchMap">
-        SELECT * FROM tournament_matches WHERE id = #{id} AND delete_flag = 0
+        SELECT * FROM tournament_match WHERE id = #{id} AND deleted = 0
     </select>
 
     <update id="updateMatchResult">
-        UPDATE tournament_matches
+        UPDATE tournament_match
         SET result = #{result},
             winner_id = #{winnerId},
             status = #{status},
             update_time = #{updateTime}
-        WHERE id = #{id} AND delete_flag = 0
+        WHERE id = #{id} AND deleted = 0
     </update>
 
     <select id="selectByTournamentId" resultMap="TournamentMatchVOMap">
@@ -82,10 +82,10 @@
             tm.result,
             tm.winner_id,
             tm.status
-        FROM tournament_matches tm
+        FROM tournament_match tm
                  LEFT JOIN user p1 ON tm.player1_id = p1.id
                  LEFT JOIN user p2 ON tm.player2_id = p2.id
-        WHERE tm.tournament_id = #{tournamentId} AND tm.delete_flag = 0
+        WHERE tm.tournament_id = #{tournamentId} AND tm.deleted = 0
         ORDER BY tm.group_name, tm.scheduled_time
     </select>
 
@@ -104,16 +104,16 @@
         tm.result as match_result,
         tm.winner_id as match_winner_id,
         tm.status as match_status
-        FROM tournament_matches tm
+        FROM tournament_match tm
         LEFT JOIN user p1 ON tm.player1_id = p1.id
         LEFT JOIN user p2 ON tm.player2_id = p2.id
-        WHERE tm.tournament_id = #{tournamentId} AND tm.delete_flag = 0
+        WHERE tm.tournament_id = #{tournamentId} AND tm.deleted = 0
         ORDER BY tm.group_name, tm.scheduled_time
     </select>
 
     <select id="selectByTournamentAndGroup" resultMap="TournamentMatchMap">
-        SELECT * FROM tournament_matches
-        WHERE tournament_id = #{tournamentId} AND group_name = #{groupName} AND delete_flag = 0
+        SELECT * FROM tournament_match
+        WHERE tournament_id = #{tournamentId} AND group_name = #{groupName} AND deleted = 0
         ORDER BY scheduled_time
     </select>
 

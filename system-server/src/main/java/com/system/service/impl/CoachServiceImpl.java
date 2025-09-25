@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.Period;
 import java.util.List;
 import java.util.UUID;
@@ -38,6 +39,8 @@ public class CoachServiceImpl implements CoachService {
         
         // 查询教练列表
         List<CoachListItemVO> coaches = coachMapper.selectCoaches(queryDTO, offset, limit);
+
+        coaches.forEach(coach -> coach.setAge(calculateAge(coach.getBirthDate())));
         
         // 查询总数
         long total = coachMapper.countCoaches(queryDTO);
@@ -68,7 +71,9 @@ public class CoachServiceImpl implements CoachService {
         if (coachDetail == null) {
             throw new RuntimeException("教练不存在或未通过审核");
         }
-        
+
+        coachDetail.setAge(calculateAge(coachDetail.getBirthDate()));
+
         // 计算当前学员数量
         int currentStudents = coachMapper.countCurrentStudents(coachUUID);
         coachDetail.setCurrentStudents(currentStudents);
@@ -97,8 +102,11 @@ public class CoachServiceImpl implements CoachService {
         if (student == null || !"student".equals(student.getRole())) {
             throw new RuntimeException("学员不存在");
         }
-        
-        return coachMapper.selectStudentCoaches(studentUUID);
+
+        List<CoachListItemVO> coaches = coachMapper.selectStudentCoaches(studentUUID);
+
+        coaches.forEach(coach -> coach.setAge(calculateAge(coach.getBirthDate())));
+        return coaches;
     }
 
     @Override
@@ -122,7 +130,17 @@ public class CoachServiceImpl implements CoachService {
         if (coach == null) {
             throw new RuntimeException("教练不存在");
         }
-        
-        return coachMapper.selectCoachStudents(coachUUID);
+
+        List<StudentListItemVO> studentListItemVOS = coachMapper.selectCoachStudents(coachUUID);
+
+        studentListItemVOS.forEach(studentListItemVO -> studentListItemVO.setAge(calculateAge(studentListItemVO.getBirthDate())));
+        return studentListItemVOS;
+    }
+
+    private Integer calculateAge(LocalDateTime birthDate) {
+        if (birthDate == null) {
+            return null;
+        }
+        return Period.between(birthDate.toLocalDate(), LocalDate.now()).getYears();
     }
 }

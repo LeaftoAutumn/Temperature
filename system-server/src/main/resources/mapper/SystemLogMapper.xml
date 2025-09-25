@@ -15,7 +15,7 @@
         <result column="details" property="details"/>
         <result column="create_time" property="createTime"/>
         <result column="update_time" property="updateTime"/>
-        <result column="delete_flag" property="deleted"/>
+        <result column="deleted" property="deleted"/>
     </resultMap>
 
     <resultMap id="SystemLogVOMap" type="com.system.vo.SystemLogVO">
@@ -32,8 +32,8 @@
     </resultMap>
 
     <insert id="insertSystemLog">
-        INSERT INTO system_logs (id, user_id, user_name, user_role, action, action_type,
-                                 ip_address, user_agent, details, create_time, update_time, delete_flag)
+        INSERT INTO system_log (id, user_id, user_name, user_role, action, action_type,
+                                 ip_address, user_agent, details, create_time, update_time, deleted)
         VALUES (#{id}, #{userId}, #{userName}, #{userRole}, #{action}, #{actionType},
                 #{ipAddress}, #{userAgent}, #{details}, #{createTime}, #{updateTime}, #{deleted})
     </insert>
@@ -42,8 +42,8 @@
         SELECT
         id, user_id, user_name, user_role, action, action_type,
         ip_address, user_agent, details, create_time
-        FROM system_logs
-        WHERE delete_flag = 0
+        FROM system_log
+        WHERE deleted = 0
         <if test="queryDTO.userId != null and queryDTO.userId != ''">
             AND user_id = #{queryDTO.userId}
         </if>
@@ -62,8 +62,8 @@
 
     <select id="countSystemLogs" resultType="long">
         SELECT COUNT(1)
-        FROM system_logs
-        WHERE delete_flag = 0
+        FROM system_log
+        WHERE deleted = 0
         <if test="queryDTO.userId != null and queryDTO.userId != ''">
             AND user_id = #{queryDTO.userId}
         </if>

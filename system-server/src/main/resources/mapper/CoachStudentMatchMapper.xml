@@ -10,7 +10,7 @@
         <result column="status" property="status"/>
         <result column="create_time" property="createTime"/>
         <result column="update_time" property="updateTime"/>
-        <result column="delete_flag" property="deleted"/>
+        <result column="deleted" property="deleted"/>
     </resultMap>
 
     <resultMap id="MatchRequestDetailVOMap" type="com.system.vo.MatchRequestDetailVO">
@@ -25,46 +25,46 @@
     </resultMap>
 
     <select id="selectByStudentAndCoach" resultMap="CoachStudentMatchMap">
-        SELECT * FROM coach_student_matches
+        SELECT * FROM coach_student_match
         WHERE student_id = #{studentId}
           AND coach_id = #{coachId}
-          AND delete_flag = 0
+          AND deleted = 0
     </select>
 
     <insert id="insertMatch">
-        INSERT INTO coach_student_matches (id, student_id, coach_id, status, create_time, update_time, delete_flag)
+        INSERT INTO coach_student_match (id, student_id, coach_id, status, create_time, update_time, deleted)
         VALUES (#{id}, #{studentId}, #{coachId}, #{status}, #{createTime}, #{updateTime}, #{deleted})
     </insert>
 
     <update id="updateMatchStatus">
-        UPDATE coach_student_matches
+        UPDATE coach_student_match
         SET status = #{status}, update_time = NOW()
         WHERE student_id = #{studentId}
           AND coach_id = #{coachId}
-          AND delete_flag = 0
+          AND deleted = 0
     </update>
 
     <select id="selectByStudentId" resultMap="CoachStudentMatchMap">
-        SELECT * FROM coach_student_matches
+        SELECT * FROM coach_student_match
         WHERE student_id = #{studentId}
-          AND delete_flag = 0
+          AND deleted = 0
           AND status = 'accepted'
     </select>
 
     <select id="selectByCoachId" resultMap="CoachStudentMatchMap">
-        SELECT * FROM coach_student_matches
+        SELECT * FROM coach_student_match
         WHERE coach_id = #{coachId}
-          AND delete_flag = 0
+          AND deleted = 0
           AND status = 'accepted'
     </select>
 
     <insert id="insertMatchRequest">
-        INSERT INTO coach_student_matches (id, student_id, coach_id, status, create_time, update_time, delete_flag)
+        INSERT INTO coach_student_match (id, student_id, coach_id, status, create_time, update_time, deleted)
         VALUES (#{id}, #{studentId}, #{coachId}, #{status}, #{createTime}, #{updateTime}, #{deleted})
     </insert>
 
     <select id="selectById" resultMap="CoachStudentMatchMap">
-        SELECT * FROM coach_student_matches WHERE id = #{id} AND delete_flag = 0
+        SELECT * FROM coach_student_match WHERE id = #{id} AND deleted = 0
     </select>
 
     <select id="selectMatchRequests" resultMap="MatchRequestDetailVOMap">
@@ -77,12 +77,12 @@
         csm.status,
         csm.create_time,
         csm.update_time
-        FROM coach_student_matches csm
+        FROM coach_student_match csm
         JOIN user s ON csm.student_id = s.id
         JOIN user c ON csm.coach_id = c.id
-        WHERE csm.delete_flag = 0
-        AND s.delete_flag = 0
-        AND c.delete_flag = 0
+        WHERE csm.deleted = 0
+        AND s.deleted = 0
+        AND c.deleted = 0
         <choose>
             <when test="userRole == 'student'">
                 AND csm.student_id = #{userId}
@@ -100,12 +100,12 @@
 
     <select id="countMatchRequests" resultType="long">
         SELECT COUNT(1)
-        FROM coach_student_matches csm
+        FROM coach_student_match csm
         JOIN user s ON csm.student_id = s.id
         JOIN user c ON csm.coach_id = c.id
-        WHERE csm.delete_flag = 0
-        AND s.delete_flag = 0
-        AND c.delete_flag = 0
+        WHERE csm.deleted = 0
+        AND s.deleted = 0
+        AND c.deleted = 0
         <choose>
             <when test="userRole == 'student'">
                 AND csm.student_id = #{userId}
@@ -121,32 +121,32 @@
 
     <select id="countAcceptedMatchesByStudent" resultType="int">
         SELECT COUNT(1)
-        FROM coach_student_matches
+        FROM coach_student_match
         WHERE student_id = #{studentId}
           AND status = 'accepted'
-          AND delete_flag = 0
+          AND deleted = 0
     </select>
 
     <select id="countAcceptedMatchesByCoach" resultType="int">
         SELECT COUNT(1)
-        FROM coach_student_matches
+        FROM coach_student_match
         WHERE coach_id = #{coachId}
           AND status = 'accepted'
-          AND delete_flag = 0
+          AND deleted = 0
     </select>
 
     <select id="selectAcceptedMatchesByStudent" resultMap="CoachStudentMatchMap">
-        SELECT * FROM coach_student_matches
+        SELECT * FROM coach_student_match
         WHERE student_id = #{studentId}
           AND status = 'accepted'
-          AND delete_flag = 0
+          AND deleted = 0
     </select>
 
     <select id="selectAcceptedMatchesByCoach" resultMap="CoachStudentMatchMap">
-        SELECT * FROM coach_student_matches
+        SELECT * FROM coach_student_match
         WHERE coach_id = #{coachId}
           AND status = 'accepted'
-          AND delete_flag = 0
+          AND deleted = 0
     </select>
 
 </mapper>

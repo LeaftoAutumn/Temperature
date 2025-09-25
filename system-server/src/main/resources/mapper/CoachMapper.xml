@@ -13,7 +13,7 @@
         <result column="is_approved" property="isApproved"/>
         <result column="create_time" property="createTime"/>
         <result column="update_time" property="updateTime"/>
-        <result column="delete_flag" property="deleted"/>
+        <result column="deleted" property="deleted"/>
     </resultMap>
 
     <resultMap id="CoachListItemVOMap" type="com.system.vo.CoachListItemVO">
@@ -52,22 +52,22 @@
     </resultMap>
 
     <select id="selectByUserId" resultMap="CoachMap">
-        SELECT * FROM coaches
-        WHERE user_id = #{userId} AND delete_flag = 0
+        SELECT * FROM coach
+        WHERE user_id = #{userId} AND deleted = 0
     </select>
 
     <insert id="insertCoach">
-        INSERT INTO coaches (user_id, level, hourly_rate, photo_url, awards, max_students, is_approved, create_time, update_time, delete_flag)
+        INSERT INTO coach (user_id, level, hourly_rate, photo_url, awards, max_students, is_approved, create_time, update_time, deleted)
         VALUES (#{userId}, #{level}, #{hourlyRate}, #{photoUrl}, #{awards}, #{maxStudents}, #{isApproved}, #{createTime}, #{updateTime}, #{deleted})
     </insert>
 
     <select id="getHourlyRate" resultType="java.math.BigDecimal">
-        SELECT hourly_rate FROM coaches
-        WHERE user_id = #{userId} AND delete_flag = 0
+        SELECT hourly_rate FROM coach
+        WHERE user_id = #{userId} AND deleted = 0
     </select>
 
     <update id="updateCoach">
-        UPDATE coaches
+        UPDATE coach
         SET level = #{level},
             hourly_rate = #{hourlyRate},
             photo_url = #{photoUrl},
@@ -75,7 +75,7 @@
             max_students = #{maxStudents},
             is_approved = #{isApproved},
             update_time = #{updateTime}
-        WHERE user_id = #{userId} AND delete_flag = 0
+        WHERE user_id = #{userId} AND deleted = 0
     </update>
 
     <select id="selectCoachDetail" resultMap="CoachDetailVOMap">
@@ -93,15 +93,15 @@
             c.max_students,
             c.is_approved,
             c.create_time
-        FROM coaches c
+        FROM coach c
                  JOIN user u ON c.user_id = u.id
         WHERE c.user_id = #{coachId}
-          AND c.delete_flag = 0
-          AND u.delete_flag = 0
+          AND c.deleted = 0
+          AND u.deleted = 0
           AND c.is_approved = 1
     </select>
 
-    <select id="selectCoaches" resultMap="CoachListItemVOMap">
+    <select id="selectcoach" resultMap="CoachListItemVOMap">
         SELECT
         c.user_id,
         u.name,
@@ -111,10 +111,10 @@
         c.hourly_rate,
         c.photo_url,
         c.awards
-        FROM coaches c
+        FROM coach c
         JOIN user u ON c.user_id = u.id
-        WHERE c.delete_flag = 0
-        AND u.delete_flag = 0
+        WHERE c.deleted = 0
+        AND u.deleted = 0
         AND u.campus_id = #{queryDTO.campusId}
         <if test="queryDTO.isApproved != null">
             AND c.is_approved = #{queryDTO.isApproved}
@@ -132,12 +132,12 @@
         LIMIT #{offset}, #{limit}
     </select>
 
-    <select id="countCoaches" resultType="long">
+    <select id="countcoach" resultType="long">
         SELECT COUNT(1)
-        FROM coaches c
+        FROM coach c
         JOIN user u ON c.user_id = u.id
-        WHERE c.delete_flag = 0
-        AND u.delete_flag = 0
+        WHERE c.deleted = 0
+        AND u.deleted = 0
         AND u.campus_id = #{queryDTO.campusId}
         <if test="queryDTO.isApproved != null">
             AND c.is_approved = #{queryDTO.isApproved}
@@ -155,13 +155,13 @@
 
     <select id="countCurrentStudents" resultType="int">
         SELECT COUNT(1)
-        FROM coach_student_matches
+        FROM coach_student_match
         WHERE coach_id = #{coachId}
           AND status = 'accepted'
-          AND delete_flag = 0
+          AND deleted = 0
     </select>
 
-    <select id="selectStudentCoaches" resultMap="CoachListItemVOMap">
+    <select id="selectStudentcoach" resultMap="CoachListItemVOMap">
         SELECT
             c.user_id,
             u.name,
@@ -171,14 +171,14 @@
             c.hourly_rate,
             c.photo_url,
             c.awards
-        FROM coach_student_matches csm
-                 JOIN coaches c ON csm.coach_id = c.user_id
+        FROM coach_student_match csm
+                 JOIN coach c ON csm.coach_id = c.user_id
                  JOIN user u ON c.user_id = u.id
         WHERE csm.student_id = #{studentId}
           AND csm.status = 'accepted'
-          AND csm.delete_flag = 0
-          AND c.delete_flag = 0
-          AND u.delete_flag = 0
+          AND csm.deleted = 0
+          AND c.deleted = 0
+          AND u.deleted = 0
         ORDER BY csm.update_time DESC
     </select>
 
@@ -189,12 +189,12 @@
             u.gender,
             u.birth_date,
             u.phone
-        FROM coach_student_matches csm
+        FROM coach_student_match csm
                  JOIN user u ON csm.student_id = u.id
         WHERE csm.coach_id = #{coachId}
           AND csm.status = 'accepted'
-          AND csm.delete_flag = 0
-          AND u.delete_flag = 0
+          AND csm.deleted = 0
+          AND u.deleted = 0
         ORDER BY csm.update_time DESC
     </select>
 

@@ -11,59 +11,59 @@
         <result column="last_cancel_month" property="lastCancelMonth"/>
         <result column="create_time" property="createTime"/>
         <result column="update_time" property="updateTime"/>
-        <result column="delete_flag" property="deleted"/>
+        <result column="deleted" property="deleted"/>
     </resultMap>
 
     <select id="selectByUserId" resultMap="StudentMap">
-        SELECT * FROM students
-        WHERE user_id = #{userId} AND delete_flag = 0
+        SELECT * FROM student
+        WHERE user_id = #{userId} AND deleted = 0
     </select>
 
     <insert id="insertStudent">
-        INSERT INTO students (user_id, balance, max_coaches, cancel_count, last_cancel_month, create_time, update_time, delete_flag)
+        INSERT INTO student (user_id, balance, max_coaches, cancel_count, last_cancel_month, create_time, update_time, deleted)
         VALUES (#{userId}, #{balance}, #{maxCoaches}, #{cancelCount}, #{lastCancelMonth}, #{createTime}, #{updateTime}, #{deleted})
     </insert>
 
     <select id="getBalance" resultType="java.math.BigDecimal">
-        SELECT balance FROM students
-        WHERE user_id = #{userId} AND delete_flag = 0
+        SELECT balance FROM student
+        WHERE user_id = #{userId} AND deleted = 0
     </select>
 
     <update id="updateBalance">
-        UPDATE students
+        UPDATE student
         SET balance = #{amount}, update_time = NOW()
-        WHERE user_id = #{userId} AND delete_flag = 0
+        WHERE user_id = #{userId} AND deleted = 0
     </update>
 
     <select id="getMonthlyCancelCount" resultType="java.lang.Integer">
-        SELECT cancel_count FROM students
+        SELECT cancel_count FROM student
         WHERE user_id = #{userId}
           AND last_cancel_month = #{yearMonth}
-          AND delete_flag = 0
+          AND deleted = 0
     </select>
 
     <update id="updateCancelCount">
-        UPDATE students
+        UPDATE student
         SET cancel_count = #{cancelCount},
             last_cancel_month = #{lastCancelMonth},
             update_time = NOW()
-        WHERE user_id = #{userId} AND delete_flag = 0
+        WHERE user_id = #{userId} AND deleted = 0
     </update>
 
     <update id="updateStudent">
-        UPDATE students
+        UPDATE student
         SET balance = #{balance},
             max_coaches = #{maxCoaches},
             cancel_count = #{cancelCount},
             last_cancel_month = #{lastCancelMonth},
             update_time = #{updateTime}
-        WHERE user_id = #{userId} AND delete_flag = 0
+        WHERE user_id = #{userId} AND deleted = 0
     </update>
 
     <update id="addBalance">
-        UPDATE students
+        UPDATE student
         SET balance = balance + #{amount}, update_time = NOW()
-        WHERE user_id = #{userId} AND delete_flag = 0
+        WHERE user_id = #{userId} AND deleted = 0
     </update>
 
 </mapper>

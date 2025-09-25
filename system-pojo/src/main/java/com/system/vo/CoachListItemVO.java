@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 @Data
 @Builder
@@ -26,6 +27,9 @@ public class CoachListItemVO implements Serializable {
     
     @ApiModelProperty(value = "性别")
     private String gender;
+
+    @ApiModelProperty(value = "出生日期")
+    private LocalDateTime birthDate;
     
     @ApiModelProperty(value = "年龄")
     private Integer age;

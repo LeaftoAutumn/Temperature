@@ -1,4 +1,3 @@
-<!-- PaymentMapper.xml -->
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
@@ -19,7 +18,7 @@
         <result column="remark" property="remark"/>
         <result column="create_time" property="createTime"/>
         <result column="update_time" property="updateTime"/>
-        <result column="delete_flag" property="deleted"/>
+        <result column="deleted" property="deleted"/>
     </resultMap>
 
     <resultMap id="PaymentRecordVOMap" type="com.system.vo.PaymentRecordVO">
@@ -44,41 +43,45 @@
         <result column="status" property="status"/>
         <result column="create_time" property="createdTime"/>
         <result column="operator_name" property="operatorName"/>
-        <result column="related_type" property="relatedInfo.type"/>
-        <result column="related_title" property="relatedInfo.title"/>
-        <result column="related_time" property="relatedInfo.time"/>
+
+        <!-- 使用association处理嵌套对象 -->
+        <association property="relatedInfo" javaType="com.system.vo.RelatedInfoVO">
+            <result column="related_type" property="type"/>
+            <result column="related_title" property="title"/>
+            <result column="related_time" property="time"/>
+        </association>
     </resultMap>
 
     <insert id="insertPayment">
-        INSERT INTO payments (id, user_id, related_id, amount, type, method, status,
+        INSERT INTO payment (id, user_id, related_id, amount, type, method, status,
                               order_no, qr_code_url, transaction_id, operator_id, remark,
-                              create_time, update_time, delete_flag)
+                              create_time, update_time, deleted)
         VALUES (#{id}, #{userId}, #{relatedId}, #{amount}, #{type}, #{method}, #{status},
                 #{orderNo}, #{qrCodeUrl}, #{transactionId}, #{operatorId}, #{remark},
                 #{createTime}, #{updateTime}, #{deleted})
     </insert>
 
     <select id="selectById" resultMap="PaymentMap">
-        SELECT * FROM payments WHERE id = #{id} AND delete_flag = 0
+        SELECT * FROM payment WHERE id = #{id} AND deleted = 0
     </select>
 
     <select id="selectByOrderNo" resultMap="PaymentMap">
-        SELECT * FROM payments WHERE order_no = #{orderNo} AND delete_flag = 0
+        SELECT * FROM payment WHERE order_no = #{orderNo} AND deleted = 0
     </select>
 
-    <update id="updatePaymentStatus">
-        UPDATE payments
+    <update id="updatepaymenttatus">
+        UPDATE payment
         SET status = #{status},
             transaction_id = #{transactionId},
             update_time = NOW()
-        WHERE id = #{id} AND delete_flag = 0
+        WHERE id = #{id} AND deleted = 0
     </update>
 
-    <select id="selectPayments" resultMap="PaymentRecordVOMap">
+    <select id="selectpayment" resultMap="PaymentRecordVOMap">
         SELECT
         id, user_id, related_id, amount, type, method, status, create_time
-        FROM payments
-        WHERE delete_flag = 0
+        FROM payment
+        WHERE deleted = 0
         <if test="userId != null">
             AND user_id = #{userId}
         </if>
@@ -101,10 +104,10 @@
         LIMIT #{offset}, #{limit}
     </select>
 
-    <select id="countPayments" resultType="long">
+    <select id="countpayment" resultType="long">
         SELECT COUNT(1)
-        FROM payments
-        WHERE delete_flag = 0
+        FROM payment
+        WHERE deleted = 0
         <if test="userId != null">
             AND user_id = #{userId}
         </if>
@@ -141,16 +144,16 @@
             NULL as related_type,
             NULL as related_title,
             NULL as related_time
-        FROM payments p
+        FROM payment p
                  LEFT JOIN user u ON p.user_id = u.id
                  LEFT JOIN user op ON p.operator_id = op.id
-        WHERE p.id = #{id} AND p.delete_flag = 0
+        WHERE p.id = #{id} AND p.deleted = 0
     </select>
 
-    <select id="selectPendingPayments" resultMap="PaymentMap">
-        SELECT * FROM payments
+    <select id="selectPendingpayment" resultMap="PaymentMap">
+        SELECT * FROM payment
         WHERE status = 'pending'
-          AND delete_flag = 0
+          AND deleted = 0
           AND create_time &lt;= DATE_SUB(NOW(), INTERVAL #{timeoutMinutes} MINUTE)
         ORDER BY create_time ASC
     </select>

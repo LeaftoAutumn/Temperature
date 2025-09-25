@@ -12,28 +12,28 @@
         <result column="status" property="status"/>
         <result column="create_time" property="createTime"/>
         <result column="update_time" property="updateTime"/>
-        <result column="delete_flag" property="deleted"/>
+        <result column="deleted" property="deleted"/>
     </resultMap>
 
     <insert id="insertChangeRequest">
-        INSERT INTO coach_change_requests (id, student_id, current_coach_id, new_coach_id, reason, status, create_time, update_time, delete_flag)
+        INSERT INTO coach_change_request (id, student_id, current_coach_id, new_coach_id, reason, status, create_time, update_time, deleted)
         VALUES (#{id}, #{studentId}, #{currentCoachId}, #{newCoachId}, #{reason}, #{status}, #{createTime}, #{updateTime}, #{deleted})
     </insert>
 
     <select id="selectById" resultMap="CoachChangeRequestMap">
-        SELECT * FROM coach_change_requests WHERE id = #{id} AND delete_flag = 0
+        SELECT * FROM coach_change_request WHERE id = #{id} AND deleted = 0
     </select>
 
     <select id="selectByStudentId" resultMap="CoachChangeRequestMap">
-        SELECT * FROM coach_change_requests
-        WHERE student_id = #{studentId} AND delete_flag = 0
+        SELECT * FROM coach_change_request
+        WHERE student_id = #{studentId} AND deleted = 0
         ORDER BY create_time DESC
     </select>
 
     <update id="updateChangeRequestStatus">
-        UPDATE coach_change_requests
+        UPDATE coach_change_request
         SET status = #{status}, update_time = NOW()
-        WHERE id = #{id} AND delete_flag = 0
+        WHERE id = #{id} AND deleted = 0
     </update>
 
 </mapper>

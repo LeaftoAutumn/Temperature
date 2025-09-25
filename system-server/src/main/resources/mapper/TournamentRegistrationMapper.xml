@@ -10,39 +10,39 @@
         <result column="fee_paid" property="feePaid"/>
         <result column="create_time" property="createTime"/>
         <result column="update_time" property="updateTime"/>
-        <result column="delete_flag" property="deleted"/>
+        <result column="deleted" property="deleted"/>
     </resultMap>
 
     <insert id="insertRegistration">
-        INSERT INTO tournament_registrations (id, student_id, tournament_id, fee_paid,
-                                              create_time, update_time, delete_flag)
+        INSERT INTO tournament_registration (id, student_id, tournament_id, fee_paid,
+                                              create_time, update_time, deleted)
         VALUES (#{id}, #{studentId}, #{tournamentId}, #{feePaid},
                 #{createTime}, #{updateTime}, #{deleted})
     </insert>
 
     <select id="selectById" resultMap="TournamentRegistrationMap">
-        SELECT * FROM tournament_registrations WHERE id = #{id} AND delete_flag = 0
+        SELECT * FROM tournament_registration WHERE id = #{id} AND deleted = 0
     </select>
 
     <select id="selectByStudentAndTournament" resultMap="TournamentRegistrationMap">
-        SELECT * FROM tournament_registrations
-        WHERE student_id = #{studentId} AND tournament_id = #{tournamentId} AND delete_flag = 0
+        SELECT * FROM tournament_registration
+        WHERE student_id = #{studentId} AND tournament_id = #{tournamentId} AND deleted = 0
     </select>
 
     <select id="selectByTournamentId" resultMap="TournamentRegistrationMap">
-        SELECT * FROM tournament_registrations
-        WHERE tournament_id = #{tournamentId} AND delete_flag = 0
+        SELECT * FROM tournament_registration
+        WHERE tournament_id = #{tournamentId} AND deleted = 0
     </select>
 
     <update id="updateFeePaidStatus">
-        UPDATE tournament_registrations
+        UPDATE tournament_registration
         SET fee_paid = #{feePaid}, update_time = NOW()
-        WHERE id = #{id} AND delete_flag = 0
+        WHERE id = #{id} AND deleted = 0
     </update>
 
     <select id="countRegistrationsByTournament" resultType="int">
-        SELECT COUNT(1) FROM tournament_registrations
-        WHERE tournament_id = #{tournamentId} AND delete_flag = 0
+        SELECT COUNT(1) FROM tournament_registration
+        WHERE tournament_id = #{tournamentId} AND deleted = 0
     </select>
 
 </mapper>

@@ -14,7 +14,7 @@
         <result column="table_number" property="tableNumber"/>
         <result column="create_time" property="createTime"/>
         <result column="update_time" property="updateTime"/>
-        <result column="delete_flag" property="deleted"/>
+        <result column="deleted" property="deleted"/>
     </resultMap>
 
     <resultMap id="ReservationListItemVOMap" type="com.system.vo.ReservationListItemVO">
@@ -41,30 +41,34 @@
         <result column="title" property="title"/>
         <result column="location" property="location"/>
         <result column="table_number" property="tableNumber"/>
-        <result column="with_user_id" property="withUser.id"/>
-        <result column="with_user_name" property="withUser.name"/>
-        <result column="with_user_role" property="withUser.role"/>
         <result column="status" property="status"/>
+
+        <!-- 使用association处理嵌套对象 -->
+        <association property="withUser" javaType="com.system.vo.RelatedUserVO">
+            <result column="with_user_name" property="name"/>
+            <result column="with_user_id" property="id"/>
+            <result column="with_user_role" property="role"/>
+        </association>
     </resultMap>
 
     <insert id="insertCourse">
-        INSERT INTO courses (id, coach_id, student_id, start_time, end_time, price, status, table_number, create_time, update_time, delete_flag)
+        INSERT INTO course (id, coach_id, student_id, start_time, end_time, price, status, table_number, create_time, update_time, deleted)
         VALUES (#{id}, #{coachId}, #{studentId}, #{startTime}, #{endTime}, #{price}, #{status}, #{tableNumber}, #{createTime}, #{updateTime}, #{deleted})
     </insert>
 
     <select id="selectById" resultMap="CourseMap">
-        SELECT * FROM courses WHERE id = #{id} AND delete_flag = 0
+        SELECT * FROM course WHERE id = #{id} AND deleted = 0
     </select>
 
     <select id="selectByStudentId" resultMap="CourseMap">
-        SELECT * FROM courses
-        WHERE student_id = #{studentId} AND delete_flag = 0
+        SELECT * FROM course
+        WHERE student_id = #{studentId} AND deleted = 0
         ORDER BY start_time DESC
     </select>
 
     <select id="selectByCoachId" resultMap="CourseMap">
-        SELECT * FROM courses
-        WHERE coach_id = #{coachId} AND delete_flag = 0
+        SELECT * FROM course
+        WHERE coach_id = #{coachId} AND deleted = 0
         ORDER BY start_time DESC
     </select>
 
@@ -82,11 +86,11 @@
         c.status,
         c.table_number,
         c.create_time
-        FROM courses c
+        FROM course c
         LEFT JOIN user s ON c.student_id = s.id
         LEFT JOIN user co ON c.coach_id = co.id
         WHERE (c.student_id = #{userId} OR c.coach_id = #{userId})
-        AND c.delete_flag = 0
+        AND c.deleted = 0
         <if test="queryDTO.status != null and queryDTO.status != ''">
             AND c.status = #{queryDTO.status}
         </if>
@@ -102,9 +106,9 @@
 
     <select id="countReservationsByUserId" resultType="long">
         SELECT COUNT(1)
-        FROM courses c
+        FROM course c
         WHERE (c.student_id = #{userId} OR c.coach_id = #{userId})
-        AND c.delete_flag = 0
+        AND c.deleted = 0
         <if test="queryDTO.status != null and queryDTO.status != ''">
             AND c.status = #{queryDTO.status}
         </if>
@@ -139,29 +143,29 @@
                 ELSE 'student'
                 END as with_user_role,
             c.status
-        FROM courses c
+        FROM course c
                  LEFT JOIN user student ON c.student_id = student.id
                  LEFT JOIN user coach ON c.coach_id = coach.id
-                 LEFT JOIN campuses camp ON student.campus_id = camp.id
+                 LEFT JOIN campus camp ON student.campus_id = camp.campus_id
         WHERE (c.student_id = #{userId} OR c.coach_id = #{userId})
-          AND c.delete_flag = 0
+          AND c.deleted = 0
           AND c.start_time >= #{startDate}
           AND c.start_time &lt;= #{endDate}
           AND c.status IN ('confirmed', 'completed')
         ORDER BY c.start_time ASC
     </select>
 
-    <update id="updateCourseStatus">
-        UPDATE courses
+    <update id="updatecoursetatus">
+        UPDATE course
         SET status = #{status}, update_time = NOW()
-        WHERE id = #{id} AND delete_flag = 0
+        WHERE id = #{id} AND deleted = 0
     </update>
 
     <select id="existsConflict" resultType="boolean">
         SELECT COUNT(1) > 0
-        FROM courses
+        FROM course
         WHERE coach_id = #{coachId}
-        AND delete_flag = 0
+        AND deleted = 0
         AND status IN ('pending', 'confirmed')
         AND (
         (start_time &lt; #{endTime} AND end_time > #{startTime})
@@ -180,11 +184,11 @@
         UNION SELECT 15 UNION SELECT 16 UNION SELECT 17 UNION SELECT 18
         ) hours
         WHERE NOT EXISTS (
-        SELECT 1 FROM courses
+        SELECT 1 FROM course
         WHERE coach_id = #{coachId}
         AND DATE(start_time) = #{date}
         AND HOUR(start_time) = hour
-        AND delete_flag = 0
+        AND deleted = 0
         AND status IN ('pending', 'confirmed')
         )
     </select>

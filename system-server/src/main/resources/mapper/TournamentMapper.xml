@@ -13,7 +13,7 @@
         <result column="entry_fee" property="entryFee"/>
         <result column="create_time" property="createTime"/>
         <result column="update_time" property="updateTime"/>
-        <result column="delete_flag" property="deleted"/>
+        <result column="deleted" property="deleted"/>
     </resultMap>
 
     <resultMap id="TournamentVOMap" type="com.system.vo.TournamentVO">
@@ -28,18 +28,18 @@
     </resultMap>
 
     <insert id="insertTournament">
-        INSERT INTO tournaments (id, name, event_date, group_type, format, status, entry_fee,
-                                 create_time, update_time, delete_flag)
+        INSERT INTO tournament (id, name, event_date, group_type, format, status, entry_fee,
+                                 create_time, update_time, deleted)
         VALUES (#{id}, #{name}, #{eventDate}, #{groupType}, #{format}, #{status}, #{entryFee},
                 #{createTime}, #{updateTime}, #{deleted})
     </insert>
 
     <select id="selectById" resultMap="TournamentMap">
-        SELECT * FROM tournaments WHERE id = #{id} AND delete_flag = 0
+        SELECT * FROM tournament WHERE id = #{id} AND deleted = 0
     </select>
 
     <update id="updateTournament">
-        UPDATE tournaments
+        UPDATE tournament
         SET name = #{name},
             event_date = #{eventDate},
             group_type = #{groupType},
@@ -47,14 +47,14 @@
             status = #{status},
             entry_fee = #{entryFee},
             update_time = #{updateTime}
-        WHERE id = #{id} AND delete_flag = 0
+        WHERE id = #{id} AND deleted = 0
     </update>
 
-    <select id="selectTournaments" resultMap="TournamentVOMap">
+    <select id="selecttournament" resultMap="TournamentVOMap">
         SELECT
         id, name, event_date, group_type, format, status, entry_fee, create_time
-        FROM tournaments
-        WHERE delete_flag = 0
+        FROM tournament
+        WHERE deleted = 0
         <if test="status != null and status != ''">
             AND status = #{status}
         </if>
@@ -63,8 +63,8 @@
 
     <select id="existsByNameAndDate" resultType="boolean">
         SELECT COUNT(1) > 0
-        FROM tournaments
-        WHERE name = #{name} AND event_date = #{eventDate} AND delete_flag = 0
+        FROM tournament
+        WHERE name = #{name} AND event_date = #{eventDate} AND deleted = 0
     </select>
 
 </mapper>
