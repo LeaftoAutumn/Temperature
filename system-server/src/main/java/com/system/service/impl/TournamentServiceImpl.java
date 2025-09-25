@@ -61,7 +61,7 @@ public class TournamentServiceImpl implements TournamentService {
         Tournament tournament = Tournament.builder()
                 .id(UUID.randomUUID())
                 .name(createDTO.getName())
-                .eventDate(LocalDate.parse(createDTO.getEventDate()))
+                .eventDate(createDTO.getEventDate())
                 .groupType(createDTO.getGroupType())
                 .format(createDTO.getFormat())
                 .status("upcoming")

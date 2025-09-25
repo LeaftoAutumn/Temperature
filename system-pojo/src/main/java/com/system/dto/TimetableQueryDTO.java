@@ -7,6 +7,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import java.io.Serializable;
 import java.time.LocalDate;
@@ -19,9 +20,11 @@ import java.time.LocalDate;
 public class TimetableQueryDTO implements Serializable {
     
     @ApiModelProperty(value = "开始日期", required = true)
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
     private LocalDate startDate;
     
     @ApiModelProperty(value = "结束日期")
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
     private LocalDate endDate;
     
     @ApiModelProperty(value = "视图类型", example = "week")
