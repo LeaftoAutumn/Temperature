@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -45,7 +46,7 @@ public class TournamentServiceImpl implements TournamentService {
 
     @Transactional
     @Override
-    public TournamentVO createTournament(TournamentCreateDTO createDTO, String currentUserId) {
+    public TournamentVO createTournament(TournamentCreateDTO createDTO) {
         log.info("创建月赛: name={}, eventDate={}", createDTO.getName(), createDTO.getEventDate());
         
         // 验证权限（只有管理员可以创建月赛）
@@ -60,7 +61,7 @@ public class TournamentServiceImpl implements TournamentService {
         Tournament tournament = Tournament.builder()
                 .id(UUID.randomUUID())
                 .name(createDTO.getName())
-                .eventDate(createDTO.getEventDate())
+                .eventDate(LocalDate.parse(createDTO.getEventDate()))
                 .groupType(createDTO.getGroupType())
                 .format(createDTO.getFormat())
                 .status("upcoming")

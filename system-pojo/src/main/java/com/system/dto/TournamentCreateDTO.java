@@ -7,6 +7,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
@@ -23,6 +24,7 @@ public class TournamentCreateDTO implements Serializable {
     private String name;
     
     @ApiModelProperty(value = "比赛日期", required = true)
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
     private LocalDate eventDate;
     
     @ApiModelProperty(value = "分组类型", required = true)
