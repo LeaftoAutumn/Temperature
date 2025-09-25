@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/evaluations")
@@ -26,10 +27,9 @@ public class EvaluationController {
 
     @GetMapping("/pending")
     @ApiOperation("获取待评价课程列表")
-    public List<PendingEvaluationVO> getPendingEvaluations(HttpServletRequest request) {
-        String currentUserId = (String) request.getAttribute("userId");
-        log.info("获取待评价课程列表: currentUserId={}", currentUserId);
-        return evaluationService.getPendingEvaluations(currentUserId);
+    public List<PendingEvaluationVO> getPendingEvaluations(@Valid String coachId, HttpServletRequest request) {
+        log.info("获取待评价课程列表: currentUserId={}", coachId);
+        return evaluationService.getPendingEvaluations(coachId);
     }
 
     @PostMapping
@@ -62,10 +62,9 @@ public class EvaluationController {
 
     @GetMapping("/stats")
     @ApiOperation("获取评价统计信息")
-    public EvaluationStatsVO getEvaluationStats(HttpServletRequest request) {
-        String currentUserId = (String) request.getAttribute("userId");
-        log.info("获取评价统计信息: currentUserId={}", currentUserId);
-        return evaluationService.getEvaluationStats(currentUserId);
+    public EvaluationStatsVO getEvaluationStats(@Valid String coachId, HttpServletRequest request) {
+        log.info("获取评价统计信息: currentUserId={}", coachId);
+        return evaluationService.getEvaluationStats(coachId);
     }
 
     @GetMapping("/courses/{courseId}/evaluations")

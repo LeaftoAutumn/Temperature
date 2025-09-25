@@ -5,6 +5,7 @@ import com.system.dto.EvaluationQueryDTO;
 import com.system.vo.*;
 
 import java.util.List;
+import java.util.UUID;
 
 public interface EvaluationService {
     

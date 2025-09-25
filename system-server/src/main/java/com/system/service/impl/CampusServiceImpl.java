@@ -55,6 +55,8 @@ public class CampusServiceImpl implements CampusService {
     @Override
     public CampusVO createCampus(CampusCreateRequestDTO createRequestDTO) {
         log.info("创建新校区: {}", createRequestDTO.getName());
+
+
         
         // 检查校区名称是否已存在
         if (campusMapper.existsByName(createRequestDTO.getName())) {

@@ -212,8 +212,8 @@
     <!-- 单独查询评分分布 -->
     <select id="selectRatingDistribution" resultType="java.util.Map">
         SELECT
-            rating as key,
-        COUNT(*) as value
+            rating as `key`,
+            COUNT(*) as `value`
         FROM evaluation
         WHERE to_user_id = #{userId}
           AND deleted = 0
