@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @Slf4j
@@ -34,7 +35,7 @@ public class CoachController {
 
     @GetMapping("/coaches/{coachId}")
     @ApiOperation("获取教练详细信息")
-    public CoachDetailVO getCoachDetail(@PathVariable String coachId) {
+    public CoachDetailVO getCoachDetail(@PathVariable UUID coachId) {
         log.info("获取教练详细信息: coachId={}", coachId);
         return coachService.getCoachDetail(coachId);
     }
@@ -49,7 +50,7 @@ public class CoachController {
 
     @GetMapping("/coaches/{coachId}/students")
     @ApiOperation("获取教练的已接收学员列表")
-    public List<StudentListItemVO> listCoachStudents(@PathVariable String coachId,
+    public List<StudentListItemVO> listCoachStudents(@PathVariable UUID coachId,
                                                    HttpServletRequest request) {
         String currentUserId = (String) request.getAttribute("userId");
         log.info("获取教练的已接收学员列表: coachId={}, currentUserId={}", coachId, currentUserId);

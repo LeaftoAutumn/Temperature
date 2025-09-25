@@ -62,11 +62,10 @@ public class CoachServiceImpl implements CoachService {
     }
 
     @Override
-    public CoachDetailVO getCoachDetail(String coachId) {
+    public CoachDetailVO getCoachDetail(UUID coachId) {
         log.info("获取教练详情: coachId={}", coachId);
         
-        UUID coachUUID = UUID.fromString(coachId);
-        CoachDetailVO coachDetail = coachMapper.selectCoachDetail(coachUUID);
+        CoachDetailVO coachDetail = coachMapper.selectCoachDetail(coachId);
         
         if (coachDetail == null) {
             throw new RuntimeException("教练不存在或未通过审核");
@@ -75,7 +74,7 @@ public class CoachServiceImpl implements CoachService {
         coachDetail.setAge(calculateAge(coachDetail.getBirthDate()));
 
         // 计算当前学员数量
-        int currentStudents = coachMapper.countCurrentStudents(coachUUID);
+        int currentStudents = coachMapper.countCurrentStudents(coachId);
         coachDetail.setCurrentStudents(currentStudents);
         
         return coachDetail;
@@ -89,7 +88,7 @@ public class CoachServiceImpl implements CoachService {
 
         // 验证学员是否存在
         User student = userMapper.selectById(studentUUID);
-        if (student == null || !"student".equals(student.getRole())) {
+        if (student == null || !"STUDENT".equals(student.getRole())) {
             throw new RuntimeException("学员不存在");
         }
 
@@ -100,28 +99,16 @@ public class CoachServiceImpl implements CoachService {
     }
 
     @Override
-    public List<StudentListItemVO> getCoachStudents(String coachId, String currentUserId) {
-        log.info("获取教练的已接收学员列表: coachId={}, currentUserId={}", coachId, currentUserId);
-        
-        UUID coachUUID = UUID.fromString(coachId);
-        UUID currentUserUUID = UUID.fromString(currentUserId);
-        
-        // 权限验证：教练只能查看自己的学员，管理员可以查看所有
-        if (!coachUUID.equals(currentUserUUID)) {
-            User currentUser = userMapper.selectById(currentUserUUID);
-            if (currentUser == null || (!"super_admin".equals(currentUser.getRole()) &&
-                !"campus_admin".equals(currentUser.getRole()))) {
-                throw new RuntimeException("无权查看他人的学员列表");
-            }
-        }
+    public List<StudentListItemVO> getCoachStudents(UUID coachId, String currentUserId) {
+        log.info("获取教练的已接收学员列表: coachId={}", coachId);
         
         // 验证教练是否存在
-        Coach coach = coachMapper.selectByUserId(coachUUID);
+        Coach coach = coachMapper.selectByUserId(coachId);
         if (coach == null) {
             throw new RuntimeException("教练不存在");
         }
 
-        List<StudentListItemVO> studentListItemVOS = coachMapper.selectCoachStudents(coachUUID);
+        List<StudentListItemVO> studentListItemVOS = coachMapper.selectCoachStudents(coachId);
 
         studentListItemVOS.forEach(studentListItemVO -> studentListItemVO.setAge(calculateAge(studentListItemVO.getBirthDate())));
         return studentListItemVOS;

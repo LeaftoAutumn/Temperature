@@ -181,21 +181,17 @@ public class PaymentServiceImpl implements PaymentService {
     }
 
     @Override
-    public PaymentPageVO getPaymentRecords(PaymentQueryDTO queryDTO, String currentUserId) {
-        log.info("获取支付记录列表: currentUserId={}", currentUserId);
-        
-        UUID userUUID = UUID.fromString(currentUserId);
-        
+    public PaymentPageVO getPaymentRecords(PaymentQueryDTO queryDTO) {
         // 设置分页参数
         Integer page = queryDTO.getPage() != null ? queryDTO.getPage() : 1;
         Integer limit = queryDTO.getLimit() != null ? queryDTO.getLimit() : 20;
         long offset = (page - 1) * limit;
         
         // 查询支付记录
-        List<PaymentRecordVO> payments = paymentMapper.selectPayment(userUUID, queryDTO, offset, limit);
+        List<PaymentRecordVO> payments = paymentMapper.selectPayment(queryDTO.getStudentId(), queryDTO, offset, limit);
         
         // 查询总数
-        long total = paymentMapper.countPayments(userUUID, queryDTO);
+        long total = paymentMapper.countPayments(queryDTO.getStudentId(), queryDTO);
         
         // 计算总页数
         int pages = (int) Math.ceil((double) total / limit);

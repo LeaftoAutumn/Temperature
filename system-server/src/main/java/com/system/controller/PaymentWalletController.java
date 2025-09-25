@@ -66,9 +66,7 @@ public class PaymentWalletController {
     @ApiOperation("获取支付记录列表")
     public PaymentPageVO getPaymentRecords(@Valid PaymentQueryDTO queryDTO,
                                          HttpServletRequest request) {
-        String currentUserId = (String) request.getAttribute("userId");
-        log.info("获取支付记录列表: currentUserId={}", currentUserId);
-        return paymentService.getPaymentRecords(queryDTO, currentUserId);
+        return paymentService.getPaymentRecords(queryDTO);
     }
 
     @GetMapping("/payments/{paymentId}")

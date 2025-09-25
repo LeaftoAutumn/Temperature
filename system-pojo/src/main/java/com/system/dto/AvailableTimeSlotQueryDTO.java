@@ -7,6 +7,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import java.io.Serializable;
 import java.time.LocalDate;
@@ -23,6 +24,7 @@ public class AvailableTimeSlotQueryDTO implements Serializable {
     private UUID coachId;
     
     @ApiModelProperty(value = "查询日期", required = true)
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
     private LocalDate date;
     
     @ApiModelProperty(value = "课程时长", example = "60")

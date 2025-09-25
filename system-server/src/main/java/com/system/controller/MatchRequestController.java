@@ -31,9 +31,8 @@ public class MatchRequestController {
     @ResponseStatus(HttpStatus.CREATED)
     public MatchRequestVO createMatchRequest(@Valid @RequestBody MatchRequestCreateDTO createDTO,
                                            HttpServletRequest request) {
-        String currentUserId = (String) request.getAttribute("userId");
-        log.info("发送双选申请: currentUserId={}", currentUserId);
-        return matchRequestService.createMatchRequest(createDTO, currentUserId);
+        log.info("发送双选申请");
+        return matchRequestService.createMatchRequest(createDTO);
     }
 
     @GetMapping

@@ -44,18 +44,12 @@ public class MatchRequestServiceImpl implements MatchRequestService {
 
     @Transactional
     @Override
-    public MatchRequestVO createMatchRequest(MatchRequestCreateDTO createDTO, String currentUserId) {
+    public MatchRequestVO createMatchRequest(MatchRequestCreateDTO createDTO) {
         log.info("发送双选申请: studentId={}, coachId={}", createDTO.getStudentId(), createDTO.getCoachId());
         
         UUID studentUUID = createDTO.getStudentId();
         UUID coachUUID = createDTO.getCoachId();
-        UUID currentUserUUID = UUID.fromString(currentUserId);
-        
-        // 验证权限：学员只能为自己发送申请
-        if (!studentUUID.equals(currentUserUUID)) {
-            throw new RuntimeException("只能为自己发送双选申请");
-        }
-        
+
         // 验证学员是否存在
         Student student = studentMapper.selectByUserId(studentUUID);
         if (student == null) {
