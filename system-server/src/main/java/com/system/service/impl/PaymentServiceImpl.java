@@ -36,51 +36,20 @@ public class PaymentServiceImpl implements PaymentService {
     @Autowired
     private UserMapper userMapper;
 
-    /*@Override
-    public BalanceVO getStudentBalance(String studentId, String currentUserId) {
-        log.info("获取学员账户余额: studentId={}, currentUserId={}", studentId, currentUserId);
-        
-        UUID studentUUID = UUID.fromString(studentId);
-        UUID currentUserUUID = UUID.fromString(currentUserId);
-        
-        // 权限验证：学员只能查看自己的余额，管理员可以查看所有
-        if (!studentUUID.equals(currentUserUUID)) {
-            User currentUser = userMapper.selectById(currentUserUUID);
-            if (currentUser == null || (!"super_admin".equals(currentUser.getRole()) &&
-                !"campus_admin".equals(currentUser.getRole()))) {
-                throw new RuntimeException("无权查看他人余额");
-            }
-        }
-        
-        // 查询学员信息
-        Student student = studentMapper.selectByUserId(studentUUID);
-        if (student == null) {
-            throw new RuntimeException("学员不存在");
-        }
-        
-        User studentUser = userMapper.selectById(studentUUID);
-        
-        return BalanceVO.builder()
-                .balance(student.getBalance())
-                .studentId(UUID.fromString(studentId))
-                .studentName(studentUser != null ? studentUser.getName() : "未知")
-                .build();
-    }*/
-
     @Override
     public BalanceVO getStudentBalance(String studentId) {
         log.info("获取学员账户余额: studentId={}", studentId);
-
+        
         UUID studentUUID = UUID.fromString(studentId);
-
+        
         // 查询学员信息
         Student student = studentMapper.selectByUserId(studentUUID);
         if (student == null) {
             throw new RuntimeException("学员不存在");
         }
-
+        
         User studentUser = userMapper.selectById(studentUUID);
-
+        
         return BalanceVO.builder()
                 .balance(student.getBalance())
                 .studentId(UUID.fromString(studentId))

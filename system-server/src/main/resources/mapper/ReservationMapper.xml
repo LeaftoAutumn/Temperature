@@ -24,7 +24,7 @@
         SELECT * FROM reservation WHERE id = #{id} AND deleted = 0
     </select>
 
-    <update id="updatereservationtatus">
+    <update id="updateReservationStatus">
         UPDATE reservation
         SET status = #{status}, update_time = NOW()
         WHERE id = #{id} AND deleted = 0

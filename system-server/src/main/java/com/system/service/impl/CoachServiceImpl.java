@@ -82,21 +82,11 @@ public class CoachServiceImpl implements CoachService {
     }
 
     @Override
-    public List<CoachListItemVO> getStudentCoaches(String studentId, String currentUserId) {
-        log.info("获取学员的已匹配教练列表: studentId={}, currentUserId={}", studentId, currentUserId);
+    public List<CoachListItemVO> getStudentCoaches(String studentId) {
+        log.info("获取学员的已匹配教练列表: studentId={}", studentId);
         
         UUID studentUUID = UUID.fromString(studentId);
-        UUID currentUserUUID = UUID.fromString(currentUserId);
-        
-        // 权限验证：学员只能查看自己的教练，管理员可以查看所有
-        if (!studentUUID.equals(currentUserUUID)) {
-            User currentUser = userMapper.selectById(currentUserUUID);
-            if (currentUser == null || (!"super_admin".equals(currentUser.getRole()) &&
-                !"campus_admin".equals(currentUser.getRole()))) {
-                throw new RuntimeException("无权查看他人的教练列表");
-            }
-        }
-        
+
         // 验证学员是否存在
         User student = userMapper.selectById(studentUUID);
         if (student == null || !"student".equals(student.getRole())) {

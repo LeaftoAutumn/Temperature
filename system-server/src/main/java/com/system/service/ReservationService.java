@@ -11,11 +11,11 @@ public interface ReservationService {
     
     ReservationDetailVO createReservation(CreateReservationRequestDTO createRequestDTO);
     
-    ReservationPageVO listReservations(ReservationQueryDTO queryDTO, String currentUserId);
+    ReservationPageVO listReservations(ReservationQueryDTO queryDTO);
     
     ReservationDetailVO updateReservationStatus(String reservationId, UpdateReservationStatusDTO updateDTO, String currentUserId);
     
-    List<TimetableItemVO> getUserTimetable(String userId, TimetableQueryDTO queryDTO, String currentUserId);
+    List<TimetableItemVO> getUserTimetable(String userId, TimetableQueryDTO queryDTO);
     
     CancellationRemainingVO getRemainingCancellations(String currentUserId);
     

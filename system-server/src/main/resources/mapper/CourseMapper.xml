@@ -155,7 +155,7 @@
         ORDER BY c.start_time ASC
     </select>
 
-    <update id="updatecoursetatus">
+    <update id="updateCourseStatus">
         UPDATE course
         SET status = #{status}, update_time = NOW()
         WHERE id = #{id} AND deleted = 0

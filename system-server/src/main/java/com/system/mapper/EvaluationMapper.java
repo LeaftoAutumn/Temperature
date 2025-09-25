@@ -5,10 +5,12 @@ import com.system.entity.Evaluation;
 import com.system.vo.EvaluationDetailVO;
 import com.system.vo.EvaluationStatsVO;
 import com.system.vo.PendingEvaluationVO;
+import org.apache.ibatis.annotations.MapKey;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @Mapper
@@ -45,4 +47,7 @@ public interface EvaluationMapper {
     EvaluationStatsVO selectEvaluationStats(@Param("userId") UUID userId);
     
     List<Evaluation> selectByToUserId(@Param("toUserId") UUID toUserId);
+
+    @MapKey("rating")
+    Map<Integer, Integer> selectRatingDistribution(String userId);
 }

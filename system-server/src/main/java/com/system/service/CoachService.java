@@ -15,7 +15,7 @@ public interface CoachService {
     
     CoachDetailVO getCoachDetail(String coachId);
     
-    List<CoachListItemVO> getStudentCoaches(String studentId, String currentUserId);
+    List<CoachListItemVO> getStudentCoaches(String studentId);
     
     List<StudentListItemVO> getCoachStudents(String coachId, String currentUserId);
 }

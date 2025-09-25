@@ -65,7 +65,7 @@
           AND deleted = 0
     </select>
 
-    <select id="selectPendingevaluation" resultMap="PendingEvaluationVOMap">
+    <select id="selectPendingEvaluations" resultMap="PendingEvaluationVOMap">
         SELECT
             c.id as course_id,
             c.start_time,
@@ -99,7 +99,7 @@
         ORDER BY c.start_time DESC
     </select>
 
-    <select id="selectReceivedevaluation" resultMap="EvaluationDetailVOMap">
+    <select id="selectReceivedEvaluations" resultMap="EvaluationDetailVOMap">
         SELECT
         e.id,
         e.course_id,
@@ -129,7 +129,7 @@
         LIMIT #{offset}, #{limit}
     </select>
 
-    <select id="countReceivedevaluation" resultType="long">
+    <select id="countReceivedEvaluations" resultType="long">
         SELECT COUNT(1)
         FROM evaluation e
         WHERE e.to_user_id = #{userId}
@@ -139,7 +139,7 @@
         </if>
     </select>
 
-    <select id="selectGivenevaluation" resultMap="EvaluationDetailVOMap">
+    <select id="selectGivenEvaluations" resultMap="EvaluationDetailVOMap">
         SELECT
             e.id,
             e.course_id,
@@ -166,7 +166,7 @@
         LIMIT #{offset}, #{limit}
     </select>
 
-    <select id="countGivenevaluation" resultType="long">
+    <select id="countGivenEvaluations" resultType="long">
         SELECT COUNT(1)
         FROM evaluation e
         WHERE e.from_user_id = #{userId}
@@ -197,6 +197,29 @@
         WHERE e.course_id = #{courseId}
           AND e.deleted = 0
         ORDER BY e.create_time DESC
+    </select>
+
+    <select id="selectEvaluationStats" resultType="com.system.vo.EvaluationStatsVO">
+        SELECT
+            COUNT(*) as totalReceived,
+            COALESCE(AVG(rating), 0) as averageRating,
+            MAX(create_time) as lastEvaluationTime
+        FROM evaluation
+        WHERE to_user_id = #{userId}
+          AND deleted = 0
+    </select>
+
+    <!-- 单独查询评分分布 -->
+    <select id="selectRatingDistribution" resultType="java.util.Map">
+        SELECT
+            rating as key,
+        COUNT(*) as value
+        FROM evaluation
+        WHERE to_user_id = #{userId}
+          AND deleted = 0
+          AND rating IS NOT NULL
+        GROUP BY rating
+        ORDER BY rating
     </select>
 
     <select id="selectByToUserId" resultMap="EvaluationMap">
