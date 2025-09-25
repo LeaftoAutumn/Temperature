@@ -1,8 +1,10 @@
 // CampusController.java (更新)
 package com.system.controller;
 
+import com.system.annotation.RequireRole;
 import com.system.dto.CampusCreateRequestDTO;
 import com.system.dto.CampusUpdateRequestDTO;
+import com.system.enumeration.UserRole;
 import com.system.service.CampusService;
 import com.system.vo.CampusVO;
 import io.swagger.annotations.Api;
@@ -34,6 +36,7 @@ public class CampusController {
     @PostMapping
     @ApiOperation("创建新校区")
     @ResponseStatus(HttpStatus.CREATED)
+    @RequireRole({UserRole.SUPER_ADMIN})
     public CampusVO createCampus(@Valid @RequestBody CampusCreateRequestDTO createRequestDTO) {
         log.info("创建新校区: {}", createRequestDTO.getName());
         return campusService.createCampus(createRequestDTO);
@@ -48,6 +51,7 @@ public class CampusController {
 
     @PutMapping("/{campusId}")
     @ApiOperation("更新校区信息")
+    @RequireRole({UserRole.SUPER_ADMIN, UserRole.ADMIN})
     public CampusVO updateCampus(@PathVariable String campusId, 
                                @Valid @RequestBody CampusUpdateRequestDTO updateRequestDTO) {
         log.info("更新校区信息: {}", campusId);
