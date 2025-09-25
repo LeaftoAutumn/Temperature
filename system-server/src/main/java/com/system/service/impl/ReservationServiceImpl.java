@@ -126,11 +126,7 @@ public class ReservationServiceImpl implements ReservationService {
     }
 
     @Override
-    public ReservationPageVO listReservations(ReservationQueryDTO queryDTO, String currentUserId) {
-        log.info("获取预约列表: userId={}", currentUserId);
-        
-        UUID userId = UUID.fromString(currentUserId);
-        
+    public ReservationPageVO listReservations(ReservationQueryDTO queryDTO) {
         // 设置分页参数
         Integer page = queryDTO.getPage() != null ? queryDTO.getPage() : 1;
         Integer limit = queryDTO.getLimit() != null ? queryDTO.getLimit() : 20;
@@ -138,10 +134,10 @@ public class ReservationServiceImpl implements ReservationService {
         
         // 查询预约列表
         List<ReservationListItemVO> reservations = courseMapper.selectReservationsByUserId(
-            userId, queryDTO, offset, limit);
+            queryDTO.getStudentId(), queryDTO, offset, limit);
         
         // 查询总数
-        long total = courseMapper.countReservationsByUserId(userId, queryDTO);
+        long total = courseMapper.countReservationsByUserId(queryDTO.getStudentId(), queryDTO);
         
         // 计算总页数
         int pages = (int) Math.ceil((double) total / limit);

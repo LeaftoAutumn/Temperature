@@ -43,9 +43,8 @@ public class CoachController {
     @ApiOperation("获取学员的已匹配教练列表")
     public List<CoachListItemVO> listStudentCoaches(@PathVariable String studentId,
                                                   HttpServletRequest request) {
-        String currentUserId = (String) request.getAttribute("userId");
-        log.info("获取学员的已匹配教练列表: studentId={}, currentUserId={}", studentId, currentUserId);
-        return coachService.getStudentCoaches(studentId, currentUserId);
+        log.info("获取学员的已匹配教练列表: studentId={}", studentId);
+        return coachService.getStudentCoaches(studentId);
     }
 
     @GetMapping("/coaches/{coachId}/students")

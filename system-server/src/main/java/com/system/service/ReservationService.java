@@ -11,7 +11,7 @@ public interface ReservationService {
     
     ReservationDetailVO createReservation(CreateReservationRequestDTO createRequestDTO);
     
-    ReservationPageVO listReservations(ReservationQueryDTO queryDTO, String currentUserId);
+    ReservationPageVO listReservations(ReservationQueryDTO queryDTO);
     
     ReservationDetailVO updateReservationStatus(String reservationId, UpdateReservationStatusDTO updateDTO, String currentUserId);
     

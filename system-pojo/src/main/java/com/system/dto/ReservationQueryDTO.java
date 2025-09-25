@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 import java.time.LocalDate;
+import java.util.UUID;
 
 @Data
 @Builder
@@ -17,6 +18,9 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @ApiModel(description = "预约查询参数")
 public class ReservationQueryDTO implements Serializable {
+
+    @ApiModelProperty(value = "学生ID")
+    private UUID studentId;
     
     @ApiModelProperty(value = "状态过滤")
     private String status;
@@ -32,4 +36,7 @@ public class ReservationQueryDTO implements Serializable {
     
     @ApiModelProperty(value = "每页数量", example = "20")
     private Integer limit;
+
+    @ApiModelProperty("排序规则")
+    private String sort;
 }

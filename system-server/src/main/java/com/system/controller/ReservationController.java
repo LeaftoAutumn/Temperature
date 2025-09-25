@@ -38,9 +38,7 @@ public class ReservationController {
     @GetMapping
     @ApiOperation("获取预约列表")
     public ReservationPageVO listReservations(@Valid ReservationQueryDTO queryDTO, HttpServletRequest request) {
-        String currentUserId = (String) request.getAttribute("userId");
-        log.info("获取预约列表: currentUserId={}", currentUserId);
-        return reservationService.listReservations(queryDTO, currentUserId);
+        return reservationService.listReservations(queryDTO);
     }
 
     @PutMapping("/{reservationId}")
