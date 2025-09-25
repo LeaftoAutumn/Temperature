@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Data
 @Builder
@@ -19,16 +20,16 @@ import java.time.LocalDateTime;
 public class CoachChangeRequestVO implements Serializable {
     
     @ApiModelProperty(value = "请求ID")
-    private String id;
+    private UUID id;
     
     @ApiModelProperty(value = "学员ID")
-    private String studentId;
+    private UUID studentId;
     
     @ApiModelProperty(value = "当前教练ID")
-    private String currentCoachId;
+    private UUID currentCoachId;
     
     @ApiModelProperty(value = "新教练ID")
-    private String newCoachId;
+    private UUID newCoachId;
     
     @ApiModelProperty(value = "请求状态")
     private String status;

@@ -9,6 +9,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
+import java.util.UUID;
 
 @Data
 @Builder
@@ -18,7 +19,7 @@ import java.io.Serializable;
 public class CoachQueryDTO implements Serializable {
     
     @ApiModelProperty(value = "校区ID", required = true)
-    private String campusId;
+    private UUID campusId;
     
     @ApiModelProperty(value = "教练姓名")
     private String name;

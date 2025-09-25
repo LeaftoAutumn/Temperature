@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Data
 @Builder
@@ -20,7 +21,7 @@ import java.time.LocalDateTime;
 public class CoachInfoVO implements Serializable {
     
     @ApiModelProperty(value = "教练ID")
-    private String id;
+    private UUID id;
     
     @ApiModelProperty(value = "教练等级")
     private String level;

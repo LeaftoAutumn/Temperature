@@ -118,7 +118,7 @@ public class TournamentServiceImpl implements TournamentService {
     
     private TournamentVO convertToVO(Tournament tournament) {
         return TournamentVO.builder()
-                .id(tournament.getId().toString())
+                .id(tournament.getId())
                 .name(tournament.getName())
                 .eventDate(tournament.getEventDate())
                 .groupType(tournament.getGroupType())

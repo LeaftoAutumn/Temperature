@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.util.UUID;
 
 @Data
 @Builder
@@ -20,12 +21,12 @@ public class PaymentNotifyDTO implements Serializable {
     private String returnMsg;
     private String resultCode;
     private String outTradeNo;
-    private String transactionId;
+    private UUID transactionId;
     private Integer totalFee;
     
     // 支付宝支付回调参数
     private String notifyType;
-    private String notifyId;
+    private UUID notifyId;
     private String tradeNo;
     private String tradeStatus;
     private BigDecimal totalAmount;

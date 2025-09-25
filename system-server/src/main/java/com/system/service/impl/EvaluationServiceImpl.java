@@ -44,8 +44,8 @@ public class EvaluationServiceImpl implements EvaluationService {
         log.info("提交课程评价: userId={}, courseId={}", userId, createDTO.getCourseId());
         
         UUID fromUserId = UUID.fromString(userId);
-        UUID courseId = UUID.fromString(createDTO.getCourseId());
-        UUID toUserId = UUID.fromString(createDTO.getToUserId());
+        UUID courseId = createDTO.getCourseId();
+        UUID toUserId = createDTO.getToUserId();
         
         // 验证课程是否存在且已完成
         Course course = courseMapper.selectById(courseId);
@@ -88,7 +88,7 @@ public class EvaluationServiceImpl implements EvaluationService {
         evaluationMapper.insertEvaluation(evaluation);
         
         return EvaluationResponseVO.builder()
-                .id(evaluation.getId().toString())
+                .id(evaluation.getId())
                 .message("评价提交成功")
                 .build();
     }
@@ -180,7 +180,7 @@ public class EvaluationServiceImpl implements EvaluationService {
         
         // 获取课程基本信息
         CourseBasicInfoVO courseInfo = CourseBasicInfoVO.builder()
-                .id(course.getId().toString())
+                .id(course.getId())
                 .startTime(course.getStartTime())
                 .endTime(course.getEndTime())
                 .tableNumber(course.getTableNumber())

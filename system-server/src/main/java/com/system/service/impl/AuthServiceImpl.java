@@ -83,8 +83,8 @@ public class AuthServiceImpl implements AuthService {
                 .birthDate(registerRequestDTO.getBirthDate())
                 .phone(registerRequestDTO.getPhone())
                 .email(registerRequestDTO.getEmail())
-                .campusId(UUID.fromString(registerRequestDTO.getCampusId()))
-                .role(registerRequestDTO.getRole())
+                .campusId(registerRequestDTO.getCampusId())
+                .role(registerRequestDTO.getUser_type().toUpperCase())
                 .createTime(LocalDateTime.now())
                 .updateTime(LocalDateTime.now())
                 .deleted(false)
@@ -93,9 +93,9 @@ public class AuthServiceImpl implements AuthService {
         userMapper.insertUser(user);
         
         // 根据角色创建扩展信息
-        if ("student".equals(registerRequestDTO.getRole())) {
+        if ("student".equals(registerRequestDTO.getUser_type())) {
             createStudentInfo(user.getId());
-        } else if ("coach".equals(registerRequestDTO.getRole())) {
+        } else if ("coach".equals(registerRequestDTO.getUser_type())) {
             createCoachInfo(user.getId(), registerRequestDTO);
         }
         
@@ -156,7 +156,7 @@ public class AuthServiceImpl implements AuthService {
     
     private UserVO convertToUserVO(User user) {
         return UserVO.builder()
-                .id(user.getId().toString())
+                .id(user.getId())
                 .username(user.getUsername())
                 .name(user.getName())
                 .gender(user.getGender())
@@ -171,7 +171,7 @@ public class AuthServiceImpl implements AuthService {
     
     private StudentInfoVO convertToStudentInfoVO(Student student) {
         return StudentInfoVO.builder()
-                .id(student.getUserId().toString())
+                .id(student.getUserId())
                 .balance(student.getBalance())
                 .maxCoaches(student.getMaxCoaches())
                 .cancelCount(student.getCancelCount())
@@ -181,7 +181,7 @@ public class AuthServiceImpl implements AuthService {
     
     private CoachInfoVO convertToCoachInfoVO(Coach coach) {
         return CoachInfoVO.builder()
-                .id(coach.getUserId().toString())
+                .id(coach.getUserId())
                 .level(coach.getLevel())
                 .hourlyRate(coach.getHourlyRate())
                 .photoUrl(coach.getPhotoUrl())

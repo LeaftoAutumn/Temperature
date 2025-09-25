@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Data
 @Builder
@@ -20,7 +21,7 @@ import java.time.LocalDateTime;
 public class TimetableItemVO implements Serializable {
     
     @ApiModelProperty(value = "ID")
-    private String id;
+    private UUID id;
     
     @ApiModelProperty(value = "日期")
     private LocalDate date;

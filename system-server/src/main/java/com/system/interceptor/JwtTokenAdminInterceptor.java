@@ -5,8 +5,6 @@ import com.system.context.BaseContext;
 import com.system.properties.JwtProperties;
 import com.system.utils.JwtUtil;
 import io.jsonwebtoken.Claims;
-import lombok.extern.java.Log;
-import lombok.extern.log4j.Log4j;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -50,11 +48,11 @@ public class JwtTokenAdminInterceptor implements HandlerInterceptor {
         try {
             log.info("jwt校验:{}", token);
             Claims claims = JwtUtil.parseJWT(jwtProperties.getAdminSecretKey(), token);
-            Long adminId = Long.valueOf(claims.get(JwtClaimsConstant.ADMIN_ID).toString());
-            log.info("当前管理员id：{}", adminId);
+            Long empId = Long.valueOf(claims.get(JwtClaimsConstant.ADMIN_ID).toString());
+            log.info("当前员工id：{}", empId);
 
-            //将当前管理员id存入ThreadLocal中
-            BaseContext.setCurrentId(adminId);
+            //将当前员工id存入ThreadLocal中
+            BaseContext.setCurrentId(empId);
 
             //3、通过，放行
             return true;

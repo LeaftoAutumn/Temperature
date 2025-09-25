@@ -9,6 +9,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
+import java.util.UUID;
 
 @Data
 @Builder
@@ -18,8 +19,8 @@ import java.io.Serializable;
 public class MatchRequestCreateDTO implements Serializable {
     
     @ApiModelProperty(value = "学员ID", required = true)
-    private String studentId;
+    private UUID studentId;
     
     @ApiModelProperty(value = "教练ID", required = true)
-    private String coachId;
+    private UUID coachId;
 }

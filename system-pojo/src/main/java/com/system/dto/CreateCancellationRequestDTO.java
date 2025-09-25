@@ -9,6 +9,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
+import java.util.UUID;
 
 @Data
 @Builder
@@ -18,7 +19,7 @@ import java.io.Serializable;
 public class CreateCancellationRequestDTO implements Serializable {
     
     @ApiModelProperty(value = "预约ID", required = true)
-    private String reservationId;
+    private UUID reservationId;
     
     @ApiModelProperty(value = "取消原因", required = true)
     private String reason;

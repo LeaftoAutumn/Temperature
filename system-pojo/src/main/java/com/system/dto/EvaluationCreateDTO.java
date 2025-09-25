@@ -9,6 +9,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
+import java.util.UUID;
 
 @Data
 @Builder
@@ -18,10 +19,10 @@ import java.io.Serializable;
 public class EvaluationCreateDTO implements Serializable {
     
     @ApiModelProperty(value = "课程ID", required = true)
-    private String courseId;
+    private UUID courseId;
     
     @ApiModelProperty(value = "被评价用户ID", required = true)
-    private String toUserId;
+    private UUID toUserId;
     
     @ApiModelProperty(value = "评分", required = true)
     private Integer rating;

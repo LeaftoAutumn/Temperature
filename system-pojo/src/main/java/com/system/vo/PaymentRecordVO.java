@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Data
 @Builder
@@ -20,13 +21,13 @@ import java.time.LocalDateTime;
 public class PaymentRecordVO implements Serializable {
     
     @ApiModelProperty(value = "支付记录ID")
-    private String id;
+    private UUID id;
     
     @ApiModelProperty(value = "用户ID")
-    private String userId;
+    private UUID userId;
     
     @ApiModelProperty(value = "关联业务ID")
-    private String relatedId;
+    private UUID relatedId;
     
     @ApiModelProperty(value = "支付金额")
     private BigDecimal amount;

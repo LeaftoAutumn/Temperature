@@ -6,6 +6,7 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.*;
 
 import java.io.Serializable;
+import java.util.UUID;
 
 @Data
 @Builder
@@ -15,7 +16,7 @@ import java.io.Serializable;
 public class RelatedUserVO implements Serializable {
     
     @ApiModelProperty(value = "用户ID")
-    private String id;
+    private UUID id;
     
     @ApiModelProperty(value = "姓名")
     private String name;

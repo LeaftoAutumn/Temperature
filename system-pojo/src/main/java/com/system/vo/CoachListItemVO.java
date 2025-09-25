@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Data
 @Builder
@@ -20,7 +21,7 @@ import java.time.LocalDateTime;
 public class CoachListItemVO implements Serializable {
     
     @ApiModelProperty(value = "用户ID")
-    private String userId;
+    private UUID userId;
     
     @ApiModelProperty(value = "姓名")
     private String name;

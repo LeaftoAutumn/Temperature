@@ -47,8 +47,8 @@ public class MatchRequestServiceImpl implements MatchRequestService {
     public MatchRequestVO createMatchRequest(MatchRequestCreateDTO createDTO, String currentUserId) {
         log.info("发送双选申请: studentId={}, coachId={}", createDTO.getStudentId(), createDTO.getCoachId());
         
-        UUID studentUUID = UUID.fromString(createDTO.getStudentId());
-        UUID coachUUID = UUID.fromString(createDTO.getCoachId());
+        UUID studentUUID = createDTO.getStudentId();
+        UUID coachUUID = createDTO.getCoachId();
         UUID currentUserUUID = UUID.fromString(currentUserId);
         
         // 验证权限：学员只能为自己发送申请
@@ -94,9 +94,9 @@ public class MatchRequestServiceImpl implements MatchRequestService {
         matchMapper.insertMatchRequest(matchRequest);
         
         return MatchRequestVO.builder()
-                .id(matchRequest.getId().toString())
-                .studentId(matchRequest.getStudentId().toString())
-                .coachId(matchRequest.getCoachId().toString())
+                .id(matchRequest.getId())
+                .studentId(matchRequest.getStudentId())
+                .coachId(matchRequest.getCoachId())
                 .status(matchRequest.getStatus())
                 .createdTime(matchRequest.getCreateTime())
                 .updatedTime(matchRequest.getUpdateTime())

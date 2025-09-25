@@ -12,6 +12,13 @@ spring:
       url: jdbc:mysql://${system.datasource.host}:${system.datasource.port}/${system.datasource.database}?serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=utf-8&zeroDateTimeBehavior=convertToNull&useSSL=false&allowPublicKeyRetrieval=true
       username: ${system.datasource.username}
       password: ${system.datasource.password}
+  web:
+    cors:
+      allowed-origins: "http://localhost:5173"
+      allowed-methods: GET,POST,PUT,DELETE,OPTIONS,PATCH
+      allowed-headers: "*"
+      allow-credentials: true
+      max-age: 3600
 
 mybatis:
   #mapper配置文件
@@ -35,6 +42,8 @@ system:
   jwt:
     secret-key: your-secret-key
     ttl: 7200000  # 2小时
+    token-header: "Authorization"
+    token-prefix: "Bearer "
     # 管理端
     # 设置jwt签名加密时使用的秘钥
     admin-secret-key: leaf

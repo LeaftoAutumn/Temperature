@@ -43,7 +43,7 @@ public class TournamentRegistrationServiceImpl implements TournamentRegistration
                                                                  String currentUserId) {
         log.info("月赛报名: tournamentId={}, userId={}", registrationDTO.getTournamentId(), currentUserId);
         
-        UUID tournamentUUID = UUID.fromString(registrationDTO.getTournamentId());
+        UUID tournamentUUID = registrationDTO.getTournamentId();
         UUID studentUUID = UUID.fromString(currentUserId);
         
         // 验证月赛是否存在
@@ -108,7 +108,7 @@ public class TournamentRegistrationServiceImpl implements TournamentRegistration
         registrationMapper.insertRegistration(registration);
         
         return TournamentRegistrationResponseVO.builder()
-                .id(registration.getId().toString())
+                .id(registration.getId())
                 .message("报名成功")
                 .build();
     }

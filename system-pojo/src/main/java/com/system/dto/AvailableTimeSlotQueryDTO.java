@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 import java.time.LocalDate;
+import java.util.UUID;
 
 @Data
 @Builder
@@ -19,7 +20,7 @@ import java.time.LocalDate;
 public class AvailableTimeSlotQueryDTO implements Serializable {
     
     @ApiModelProperty(value = "教练ID", required = true)
-    private String coachId;
+    private UUID coachId;
     
     @ApiModelProperty(value = "查询日期", required = true)
     private LocalDate date;

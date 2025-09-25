@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Data
 @Builder
@@ -19,7 +20,7 @@ import java.time.LocalDateTime;
 public class CampusUserVO implements Serializable {
     
     @ApiModelProperty(value = "用户ID")
-    private String id;
+    private UUID id;
     
     @ApiModelProperty(value = "用户名")
     private String username;

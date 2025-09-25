@@ -62,7 +62,7 @@ public class PaymentServiceImpl implements PaymentService {
         
         return BalanceVO.builder()
                 .balance(student.getBalance())
-                .studentId(studentId)
+                .studentId(UUID.fromString(studentId))
                 .studentName(studentUser != null ? studentUser.getName() : "未知")
                 .build();
     }
@@ -73,7 +73,7 @@ public class PaymentServiceImpl implements PaymentService {
         log.info("创建充值订单: studentId={}, amount={}, method={}", 
                 createDTO.getStudentId(), createDTO.getAmount(), createDTO.getMethod());
         
-        UUID studentUUID = UUID.fromString(createDTO.getStudentId());
+        UUID studentUUID = createDTO.getStudentId();
         UUID currentUserUUID = UUID.fromString(currentUserId);
         
         // 验证权限：学员只能为自己充值
@@ -113,7 +113,7 @@ public class PaymentServiceImpl implements PaymentService {
         paymentMapper.insertPayment(payment);
         
         return TopUpOrderVO.builder()
-                .id(payment.getId().toString())
+                .id(payment.getId())
                 .orderNo(payment.getOrderNo())
                 .studentId(createDTO.getStudentId())
                 .amount(payment.getAmount())
@@ -130,8 +130,8 @@ public class PaymentServiceImpl implements PaymentService {
         log.info("创建线下充值记录: studentId={}, amount={}", 
                 createDTO.getStudentId(), createDTO.getAmount());
         
-        UUID studentUUID = UUID.fromString(createDTO.getStudentId());
-        UUID operatorUUID = UUID.fromString(createDTO.getOperatorId());
+        UUID studentUUID = createDTO.getStudentId();
+        UUID operatorUUID = createDTO.getOperatorId();
         UUID currentUserUUID = UUID.fromString(currentUserId);
         
         // 权限验证：只有管理员可以创建线下充值记录
@@ -170,7 +170,7 @@ public class PaymentServiceImpl implements PaymentService {
                 .type("topup")
                 .method("offline")
                 .status("completed")
-                .operatorId(operatorUUID.toString())
+                .operatorId(operatorUUID)
                 .remark(createDTO.getRemark())
                 .createTime(LocalDateTime.now())
                 .updateTime(LocalDateTime.now())
@@ -180,8 +180,8 @@ public class PaymentServiceImpl implements PaymentService {
         paymentMapper.insertPayment(payment);
         
         return PaymentRecordVO.builder()
-                .id(payment.getId().toString())
-                .userId(payment.getUserId().toString())
+                .id(payment.getId())
+                .userId(payment.getUserId())
                 .amount(payment.getAmount())
                 .type(payment.getType())
                 .method(payment.getMethod())
@@ -279,8 +279,8 @@ public class PaymentServiceImpl implements PaymentService {
             // 处理支付结果
             if (isPaymentSuccess(notifyDTO)) {
                 // 更新支付状态
-                paymentMapper.updatePaymentStatus(payment.getId(), "completed", 
-                        notifyDTO.getTransactionId());
+                paymentMapper.updatePaymentStatus(payment.getId(), "completed",
+                        String.valueOf(notifyDTO.getTransactionId()));
                 
                 // 更新学员余额
                 studentMapper.addBalance(payment.getUserId(), payment.getAmount());
@@ -336,7 +336,7 @@ public class PaymentServiceImpl implements PaymentService {
                 .returnCode("SUCCESS")
                 .resultCode("SUCCESS")
                 .outTradeNo("TOP20231101123456")
-                .transactionId("4200001234567890")
+                .transactionId(UUID.fromString("4200001234567890"))
                 .totalFee(20000)
                 .build();
     }

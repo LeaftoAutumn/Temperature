@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Data
 @Builder
@@ -19,10 +20,10 @@ import java.time.LocalDateTime;
 public class SystemLogVO implements Serializable {
     
     @ApiModelProperty(value = "日志ID")
-    private String id;
+    private UUID id;
     
     @ApiModelProperty(value = "用户ID")
-    private String userId;
+    private UUID userId;
     
     @ApiModelProperty(value = "用户名")
     private String userName;

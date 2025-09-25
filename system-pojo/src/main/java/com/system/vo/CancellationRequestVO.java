@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Data
 @Builder
@@ -19,10 +20,10 @@ import java.time.LocalDateTime;
 public class CancellationRequestVO implements Serializable {
     
     @ApiModelProperty(value = "取消申请ID")
-    private String id;
+    private UUID id;
     
     @ApiModelProperty(value = "预约ID")
-    private String reservationId;
+    private UUID reservationId;
     
     @ApiModelProperty(value = "发起人")
     private String initiatedBy;

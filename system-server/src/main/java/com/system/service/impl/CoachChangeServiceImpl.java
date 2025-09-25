@@ -42,9 +42,9 @@ public class CoachChangeServiceImpl implements CoachChangeService {
         log.info("发起更换教练请求: studentId={}, currentCoachId={}, newCoachId={}", 
                 createDTO.getStudentId(), createDTO.getCurrentCoachId(), createDTO.getNewCoachId());
         
-        UUID studentUUID = UUID.fromString(createDTO.getStudentId());
-        UUID currentCoachUUID = UUID.fromString(createDTO.getCurrentCoachId());
-        UUID newCoachUUID = UUID.fromString(createDTO.getNewCoachId());
+        UUID studentUUID = createDTO.getStudentId();
+        UUID currentCoachUUID = createDTO.getCurrentCoachId();
+        UUID newCoachUUID = createDTO.getNewCoachId();
         UUID currentUserUUID = UUID.fromString(currentUserId);
         
         // 验证权限：学员只能为自己发起更换请求
@@ -98,10 +98,10 @@ public class CoachChangeServiceImpl implements CoachChangeService {
         changeRequestMapper.insertChangeRequest(changeRequest);
         
         return CoachChangeRequestVO.builder()
-                .id(changeRequest.getId().toString())
-                .studentId(changeRequest.getStudentId().toString())
-                .currentCoachId(changeRequest.getCurrentCoachId().toString())
-                .newCoachId(changeRequest.getNewCoachId().toString())
+                .id(changeRequest.getId())
+                .studentId(changeRequest.getStudentId())
+                .currentCoachId(changeRequest.getCurrentCoachId())
+                .newCoachId(changeRequest.getNewCoachId())
                 .status(changeRequest.getStatus())
                 .reason(changeRequest.getReason())
                 .createdTime(changeRequest.getCreateTime())

@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Data
 @Builder
@@ -19,13 +20,13 @@ import java.time.LocalDateTime;
 public class MatchRequestVO implements Serializable {
     
     @ApiModelProperty(value = "申请ID")
-    private String id;
+    private UUID id;
     
     @ApiModelProperty(value = "学员ID")
-    private String studentId;
+    private UUID studentId;
     
     @ApiModelProperty(value = "教练ID")
-    private String coachId;
+    private UUID coachId;
     
     @ApiModelProperty(value = "申请状态")
     private String status;

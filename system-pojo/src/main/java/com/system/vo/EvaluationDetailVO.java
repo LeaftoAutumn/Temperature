@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Data
 @Builder
@@ -19,13 +20,13 @@ import java.time.LocalDateTime;
 public class EvaluationDetailVO implements Serializable {
     
     @ApiModelProperty(value = "评价ID")
-    private String id;
+    private UUID id;
     
     @ApiModelProperty(value = "课程ID")
-    private String courseId;
+    private UUID courseId;
     
     @ApiModelProperty(value = "评价人ID")
-    private String fromUserId;
+    private UUID fromUserId;
     
     @ApiModelProperty(value = "评价人姓名")
     private String fromUserName;
@@ -34,7 +35,7 @@ public class EvaluationDetailVO implements Serializable {
     private String fromUserRole;
     
     @ApiModelProperty(value = "被评价人ID")
-    private String toUserId;
+    private UUID toUserId;
     
     @ApiModelProperty(value = "被评价人姓名")
     private String toUserName;

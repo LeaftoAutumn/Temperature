@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.util.UUID;
 
 @Data
 @Builder
@@ -22,7 +23,7 @@ public class BalanceVO implements Serializable {
     private BigDecimal balance;
     
     @ApiModelProperty(value = "学员ID")
-    private String studentId;
+    private UUID studentId;
     
     @ApiModelProperty(value = "学员姓名")
     private String studentName;

@@ -12,6 +12,7 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Data
 @Builder
@@ -21,7 +22,7 @@ import java.time.LocalDateTime;
 public class TournamentVO implements Serializable {
     
     @ApiModelProperty(value = "月赛ID")
-    private String id;
+    private UUID id;
     
     @ApiModelProperty(value = "月赛名称")
     private String name;

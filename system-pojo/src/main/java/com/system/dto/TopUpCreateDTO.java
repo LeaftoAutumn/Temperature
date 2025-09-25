@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.util.UUID;
 
 @Data
 @Builder
@@ -19,7 +20,7 @@ import java.math.BigDecimal;
 public class TopUpCreateDTO implements Serializable {
     
     @ApiModelProperty(value = "学员ID", required = true)
-    private String studentId;
+    private UUID studentId;
     
     @ApiModelProperty(value = "充值金额", required = true)
     private BigDecimal amount;

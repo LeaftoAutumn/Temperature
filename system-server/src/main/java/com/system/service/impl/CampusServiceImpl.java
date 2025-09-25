@@ -148,7 +148,7 @@ public class CampusServiceImpl implements CampusService {
     
     private CampusVO convertToCampusVO(Campus campus) {
         return CampusVO.builder()
-                .id(campus.getCampusId().toString())
+                .id(campus.getCampusId())
                 .name(campus.getName())
                 .address(campus.getAddress())
                 .contactPhone(campus.getPhone())

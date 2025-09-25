@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 import java.time.LocalDate;
+import java.util.UUID;
 
 @Data
 @Builder
@@ -40,10 +41,10 @@ public class RegisterRequestDTO implements Serializable {
     private String email;
     
     @ApiModelProperty(value = "校区ID", required = true, example = "550e8400-e29b-41d4-a716-446655440000")
-    private String campusId;
+    private UUID campusId;
     
     @ApiModelProperty(value = "角色", required = true, example = "student")
-    private String role;
+    private String user_type;
     
     @ApiModelProperty(value = "教练等级", example = "intermediate")
     private String level;

@@ -28,7 +28,7 @@ public class Payment implements Serializable {
     private String orderNo;
     private String qrCodeUrl;
     private String transactionId;
-    private String operatorId;
+    private UUID operatorId;
     private String remark;
     private LocalDateTime createTime;
     private LocalDateTime updateTime;

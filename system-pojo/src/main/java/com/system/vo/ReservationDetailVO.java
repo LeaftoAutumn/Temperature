@@ -9,6 +9,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
+import java.util.UUID;
 
 @Data
 @Builder
@@ -21,7 +22,7 @@ public class ReservationDetailVO implements Serializable {
     private ReservationListItemVO reservation;
     
     @ApiModelProperty(value = "课程ID")
-    private String courseId;
+    private UUID courseId;
     
     @ApiModelProperty(value = "是否可以取消")
     private Boolean canCancel;

@@ -44,7 +44,7 @@ public class ReservationServiceImpl implements ReservationService {
         log.info("查询可用时段: coachId={}, date={}", queryDTO.getCoachId(), queryDTO.getDate());
         
         List<LocalDateTime> timeSlots = courseMapper.getAvailableTimeSlots(
-            UUID.fromString(queryDTO.getCoachId()), 
+            queryDTO.getCoachId(),
             queryDTO.getDate().toString(),
             queryDTO.getDuration() != null ? queryDTO.getDuration() : 60
         );
@@ -64,8 +64,8 @@ public class ReservationServiceImpl implements ReservationService {
     public ReservationDetailVO createReservation(CreateReservationRequestDTO createRequestDTO) {
         log.info("创建课程预约: studentId={}, coachId={}", createRequestDTO.getStudentId(), createRequestDTO.getCoachId());
         
-        UUID studentId = UUID.fromString(createRequestDTO.getStudentId());
-        UUID coachId = UUID.fromString(createRequestDTO.getCoachId());
+        UUID studentId = createRequestDTO.getStudentId();
+        UUID coachId = createRequestDTO.getCoachId();
         
         // 验证双选关系
         if (!reservationMapper.existsCoachStudentMatch(studentId, coachId)) {
@@ -246,7 +246,7 @@ public class ReservationServiceImpl implements ReservationService {
         log.info("创建取消申请: reservationId={}", createDTO.getReservationId());
         
         UUID currentUserUUID = UUID.fromString(currentUserId);
-        UUID reservationUUID = UUID.fromString(createDTO.getReservationId());
+        UUID reservationUUID = createDTO.getReservationId();
         
         Reservation reservation = reservationMapper.selectById(reservationUUID);
         if (reservation == null) {
@@ -295,7 +295,7 @@ public class ReservationServiceImpl implements ReservationService {
         
         // 创建取消申请记录（这里简化处理，实际可能需要单独的取消申请表）
         return CancellationRequestVO.builder()
-                .id(UUID.randomUUID().toString())
+                .id(UUID.randomUUID())
                 .reservationId(createDTO.getReservationId())
                 .initiatedBy(reservation.getStudentId().equals(currentUserUUID) ? "student" : "coach")
                 .reason(createDTO.getReason())
@@ -312,8 +312,8 @@ public class ReservationServiceImpl implements ReservationService {
         log.info("确认取消申请: cancellationId={}, confirm={}", cancellationId, confirmDTO.getConfirm());
         
         return CancellationRequestVO.builder()
-                .id(cancellationId)
-                .reservationId("mock-reservation-id")
+                .id(UUID.fromString(cancellationId))
+                .reservationId(UUID.fromString("mock-reservation-id"))
                 .initiatedBy("student")
                 .reason("临时有事")
                 .status(confirmDTO.getConfirm() ? "confirmed" : "rejected")
@@ -330,10 +330,10 @@ public class ReservationServiceImpl implements ReservationService {
         
         // 这里需要查询相关的用户信息来构建完整的ReservationListItemVO
         ReservationListItemVO reservationItem = ReservationListItemVO.builder()
-                .id(course.getId().toString())
-                .studentId(course.getStudentId().toString())
+                .id(course.getId())
+                .studentId(course.getStudentId())
                 .studentName("学员姓名") // 需要从数据库查询
-                .coachId(course.getCoachId().toString())
+                .coachId(course.getCoachId())
                 .coachName("教练姓名") // 需要从数据库查询
                 .startTime(course.getStartTime())
                 .endTime(course.getEndTime())
@@ -346,7 +346,7 @@ public class ReservationServiceImpl implements ReservationService {
         
         return ReservationDetailVO.builder()
                 .reservation(reservationItem)
-                .courseId(course.getId().toString())
+                .courseId(course.getId())
                 .canCancel(canCancelReservation(course))
                 .build();
     }

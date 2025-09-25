@@ -9,6 +9,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
+import java.util.UUID;
 
 @Data
 @Builder
@@ -18,7 +19,7 @@ import java.io.Serializable;
 public class TournamentRegistrationResponseVO implements Serializable {
     
     @ApiModelProperty(value = "报名记录ID")
-    private String id;
+    private UUID id;
     
     @ApiModelProperty(value = "响应消息")
     private String message;

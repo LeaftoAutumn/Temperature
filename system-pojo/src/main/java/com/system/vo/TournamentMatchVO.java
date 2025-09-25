@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Data
 @Builder
@@ -19,19 +20,19 @@ import java.time.LocalDateTime;
 public class TournamentMatchVO implements Serializable {
     
     @ApiModelProperty(value = "比赛ID")
-    private String id;
+    private UUID id;
     
     @ApiModelProperty(value = "月赛ID")
-    private String tournamentId;
+    private UUID tournamentId;
     
     @ApiModelProperty(value = "组别名称")
     private String groupName;
     
     @ApiModelProperty(value = "选手1ID")
-    private String player1Id;
+    private UUID player1Id;
     
     @ApiModelProperty(value = "选手2ID")
-    private String player2Id;
+    private UUID player2Id;
     
     @ApiModelProperty(value = "选手1姓名")
     private String player1Name;
@@ -46,7 +47,7 @@ public class TournamentMatchVO implements Serializable {
     private String result;
     
     @ApiModelProperty(value = "获胜者ID")
-    private String winnerId;
+    private UUID winnerId;
     
     @ApiModelProperty(value = "比赛状态")
     private String status;

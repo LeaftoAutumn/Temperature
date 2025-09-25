@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Data
 @Builder
@@ -20,13 +21,13 @@ import java.time.LocalDateTime;
 public class TopUpOrderVO implements Serializable {
     
     @ApiModelProperty(value = "订单ID")
-    private String id;
+    private UUID id;
     
     @ApiModelProperty(value = "订单号")
     private String orderNo;
     
     @ApiModelProperty(value = "学员ID")
-    private String studentId;
+    private UUID studentId;
     
     @ApiModelProperty(value = "充值金额")
     private BigDecimal amount;

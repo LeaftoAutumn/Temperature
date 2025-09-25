@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Data
 @Builder
@@ -19,13 +20,13 @@ import java.time.LocalDateTime;
 public class PendingEvaluationVO implements Serializable {
     
     @ApiModelProperty(value = "课程ID")
-    private String courseId;
+    private UUID courseId;
     
     @ApiModelProperty(value = "课程时间")
     private LocalDateTime courseDate;
     
     @ApiModelProperty(value = "对方用户ID")
-    private String opponentId;
+    private UUID opponentId;
     
     @ApiModelProperty(value = "对方姓名")
     private String opponentName;
