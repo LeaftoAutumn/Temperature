@@ -16,7 +16,7 @@ public interface PaymentService {
     
     PaymentRecordVO createOfflineTopUp(OfflineTopUpCreateDTO createDTO, String currentUserId);
     
-    PaymentPageVO getPaymentRecords(PaymentQueryDTO queryDTO, String currentUserId);
+    PaymentPageVO getPaymentRecords(PaymentQueryDTO queryDTO);
     
     PaymentRecordDetailVO getPaymentRecordDetail(String paymentId, String currentUserId);
     

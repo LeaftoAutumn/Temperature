@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 import java.time.LocalDate;
+import java.util.UUID;
 
 @Data
 @Builder
@@ -17,6 +18,8 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @ApiModel(description = "支付记录查询参数")
 public class PaymentQueryDTO implements Serializable {
+
+    private UUID studentId;
     
     @ApiModelProperty(value = "支付类型")
     private String type; // topup, course, tournament, refund

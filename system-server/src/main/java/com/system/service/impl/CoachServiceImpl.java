@@ -89,7 +89,7 @@ public class CoachServiceImpl implements CoachService {
 
         // 验证学员是否存在
         User student = userMapper.selectById(studentUUID);
-        if (student == null || !"student".equals(student.getRole())) {
+        if (student == null || !"STUDENT".equals(student.getRole())) {
             throw new RuntimeException("学员不存在");
         }
 
