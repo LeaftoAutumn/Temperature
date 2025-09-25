@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.system.mapper.StudentMapper">
+
+    <resultMap id="StudentMap" type="com.system.entity.Student">
+        <id column="user_id" property="userId"/>
+        <result column="balance" property="balance"/>
+        <result column="max_coaches" property="maxCoaches"/>
+        <result column="cancel_count" property="cancelCount"/>
+        <result column="last_cancel_month" property="lastCancelMonth"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+        <result column="delete_flag" property="deleted"/>
+    </resultMap>
+
+    <select id="selectByUserId" resultMap="StudentMap">
+        SELECT * FROM students
+        WHERE user_id = #{userId} AND delete_flag = 0
+    </select>
+
+    <insert id="insertStudent">
+        INSERT INTO students (user_id, balance, max_coaches, cancel_count, last_cancel_month, create_time, update_time, delete_flag)
+        VALUES (#{userId}, #{balance}, #{maxCoaches}, #{cancelCount}, #{lastCancelMonth}, #{createTime}, #{updateTime}, #{deleted})
+    </insert>
+
+    <select id="getBalance" resultType="java.math.BigDecimal">
+        SELECT balance FROM students
+        WHERE user_id = #{userId} AND delete_flag = 0
+    </select>
+
+    <update id="updateBalance">
+        UPDATE students
+        SET balance = #{amount}, update_time = NOW()
+        WHERE user_id = #{userId} AND delete_flag = 0
+    </update>
+
+    <select id="getMonthlyCancelCount" resultType="java.lang.Integer">
+        SELECT cancel_count FROM students
+        WHERE user_id = #{userId}
+          AND last_cancel_month = #{yearMonth}
+          AND delete_flag = 0
+    </select>
+
+    <update id="updateCancelCount">
+        UPDATE students
+        SET cancel_count = #{cancelCount},
+            last_cancel_month = #{lastCancelMonth},
+            update_time = NOW()
+        WHERE user_id = #{userId} AND delete_flag = 0
+    </update>
+
+    <update id="updateStudent">
+        UPDATE students
+        SET balance = #{balance},
+            max_coaches = #{maxCoaches},
+            cancel_count = #{cancelCount},
+            last_cancel_month = #{lastCancelMonth},
+            update_time = #{updateTime}
+        WHERE user_id = #{userId} AND delete_flag = 0
+    </update>
+
+</mapper>

@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.system.mapper.NotificationMapper">
+
+    <resultMap id="NotificationMap" type="com.system.entity.Notification">
+        <id column="id" property="id"/>
+        <result column="user_id" property="userId"/>
+        <result column="title" property="title"/>
+        <result column="content" property="content"/>
+        <result column="type" property="type"/>
+        <result column="related_id" property="relatedId"/>
+        <result column="related_type" property="relatedType"/>
+        <result column="is_read" property="isRead"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+        <result column="delete_flag" property="deleted"/>
+        <result column="metadata" property="metadata"/>
+    </resultMap>
+
+    <resultMap id="NotificationVOMap" type="com.system.vo.NotificationVO">
+        <id column="id" property="id"/>
+        <result column="user_id" property="userId"/>
+        <result column="title" property="title"/>
+        <result column="content" property="content"/>
+        <result column="type" property="type"/>
+        <result column="related_id" property="relatedId"/>
+        <result column="related_type" property="relatedType"/>
+        <result column="is_read" property="isRead"/>
+        <result column="create_time" property="createTime"/>
+        <result column="metadata" property="metadata" typeHandler="com.system.handler.JsonTypeHandler"/>
+    </resultMap>
+
+    <insert id="insertNotification">
+        INSERT INTO notifications (id, user_id, title, content, type, related_id, related_type,
+                                   is_read, create_time, update_time, delete_flag, metadata)
+        VALUES (#{id}, #{userId}, #{title}, #{content}, #{type}, #{relatedId}, #{relatedType},
+                #{isRead}, #{createTime}, #{updateTime}, #{deleted}, #{metadata})
+    </insert>
+
+    <select id="selectById" resultMap="NotificationMap">
+        SELECT * FROM notifications WHERE id = #{id} AND delete_flag = 0
+    </select>
+
+    <update id="updateReadStatus">
+        UPDATE notifications
+        SET is_read = #{isRead}, update_time = NOW()
+        WHERE id = #{id} AND delete_flag = 0
+    </update>
+
+    <update id="batchUpdateReadStatus">
+        UPDATE notifications
+        SET is_read = #{isRead}, update_time = NOW()
+        WHERE id IN
+        <foreach collection="ids" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+        AND delete_flag = 0
+    </update>
+
+    <update id="markAllAsRead">
+        UPDATE notifications
+        SET is_read = 1, update_time = NOW()
+        WHERE user_id = #{userId} AND delete_flag = 0 AND is_read = 0
+    </update>
+
+    <select id="selectByUserId" resultMap="NotificationVOMap">
+        SELECT
+        id, user_id, title, content, type, related_id, related_type,
+        is_read, create_time, metadata
+        FROM notifications
+        WHERE user_id = #{userId} AND delete_flag = 0
+        <if test="queryDTO.isRead != null">
+            AND is_read = #{queryDTO.isRead}
+        </if>
+        <if test="queryDTO.type != null and queryDTO.type != ''">
+            AND type = #{queryDTO.type}
+        </if>
+        ORDER BY create_time DESC
+        LIMIT #{offset}, #{limit}
+    </select>
+
+    <select id="countByUserId" resultType="long">
+        SELECT COUNT(1)
+        FROM notifications
+        WHERE user_id = #{userId} AND delete_flag = 0
+        <if test="queryDTO.isRead != null">
+            AND is_read = #{queryDTO.isRead}
+        </if>
+        <if test="queryDTO.type != null and queryDTO.type != ''">
+            AND type = #{queryDTO.type}
+        </if>
+    </select>
+
+    <select id="countUnreadByUserId" resultType="int">
+        SELECT COUNT(1)
+        FROM notifications
+        WHERE user_id = #{userId} AND delete_flag = 0 AND is_read = 0
+    </select>
+
+</mapper>

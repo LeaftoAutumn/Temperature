@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.system.mapper.CoachStudentMatchMapper">
+
+    <resultMap id="CoachStudentMatchMap" type="com.system.entity.CoachStudentMatch">
+        <id column="id" property="id"/>
+        <result column="student_id" property="studentId"/>
+        <result column="coach_id" property="coachId"/>
+        <result column="status" property="status"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+        <result column="delete_flag" property="deleted"/>
+    </resultMap>
+
+    <select id="selectByStudentAndCoach" resultMap="CoachStudentMatchMap">
+        SELECT * FROM coach_student_matches
+        WHERE student_id = #{studentId}
+          AND coach_id = #{coachId}
+          AND delete_flag = 0
+    </select>
+
+    <insert id="insertMatch">
+        INSERT INTO coach_student_matches (id, student_id, coach_id, status, create_time, update_time, delete_flag)
+        VALUES (#{id}, #{studentId}, #{coachId}, #{status}, #{createTime}, #{updateTime}, #{deleted})
+    </insert>
+
+    <update id="updateMatchStatus">
+        UPDATE coach_student_matches
+        SET status = #{status}, update_time = NOW()
+        WHERE student_id = #{studentId}
+          AND coach_id = #{coachId}
+          AND delete_flag = 0
+    </update>
+
+    <select id="selectByStudentId" resultMap="CoachStudentMatchMap">
+        SELECT * FROM coach_student_matches
+        WHERE student_id = #{studentId}
+          AND delete_flag = 0
+          AND status = 'accepted'
+    </select>
+
+    <select id="selectByCoachId" resultMap="CoachStudentMatchMap">
+        SELECT * FROM coach_student_matches
+        WHERE coach_id = #{coachId}
+          AND delete_flag = 0
+          AND status = 'accepted'
+    </select>
+
+</mapper>

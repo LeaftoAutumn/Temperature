@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.system.mapper.CoachMapper">
+
+    <resultMap id="CoachMap" type="com.system.entity.Coach">
+        <id column="user_id" property="userId"/>
+        <result column="level" property="level"/>
+        <result column="hourly_rate" property="hourlyRate"/>
+        <result column="photo_url" property="photoUrl"/>
+        <result column="awards" property="awards"/>
+        <result column="max_students" property="maxStudents"/>
+        <result column="is_approved" property="isApproved"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+        <result column="delete_flag" property="deleted"/>
+    </resultMap>
+
+    <select id="selectByUserId" resultMap="CoachMap">
+        SELECT * FROM coaches
+        WHERE user_id = #{userId} AND delete_flag = 0
+    </select>
+
+    <insert id="insertCoach">
+        INSERT INTO coaches (user_id, level, hourly_rate, photo_url, awards, max_students, is_approved, create_time, update_time, delete_flag)
+        VALUES (#{userId}, #{level}, #{hourlyRate}, #{photoUrl}, #{awards}, #{maxStudents}, #{isApproved}, #{createTime}, #{updateTime}, #{deleted})
+    </insert>
+
+    <select id="getHourlyRate" resultType="java.math.BigDecimal">
+        SELECT hourly_rate FROM coaches
+        WHERE user_id = #{userId} AND delete_flag = 0
+    </select>
+
+    <update id="updateCoach">
+        UPDATE coaches
+        SET level = #{level},
+            hourly_rate = #{hourlyRate},
+            photo_url = #{photoUrl},
+            awards = #{awards},
+            max_students = #{maxStudents},
+            is_approved = #{isApproved},
+            update_time = #{updateTime}
+        WHERE user_id = #{userId} AND delete_flag = 0
+    </update>
+
+</mapper>

@@ -1,12 +1,84 @@
+<!-- CampusMapper.xml -->
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="com.system.mapper.CampusMapper">
 
-    <insert id="createCampus" useGeneratedKeys="true" keyProperty="id">
-        insert into campuses (id, name, address, contact_phone, is_center, create_time, update_time, delete_flag)
-        values
-            (#{campusId}, #{name}, #{address}, #{contactPhone}, #{isCenter}, #{createTime}, #{updateTime}, #{deleted})
+    <resultMap id="CampusMap" type="com.system.entity.Campus">
+        <id column="id" property="campusId"/>
+        <result column="name" property="name"/>
+        <result column="address" property="address"/>
+        <result column="contact_phone" property="phone"/>
+        <result column="is_center" property="center"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+        <result column="delete_flag" property="deleted"/>
+    </resultMap>
+
+    <resultMap id="CampusUserVOMap" type="com.system.vo.CampusUserVO">
+        <result column="id" property="id"/>
+        <result column="username" property="username"/>
+        <result column="name" property="name"/>
+        <result column="phone" property="phone"/>
+        <result column="email" property="email"/>
+        <result column="role" property="role"/>
+        <result column="create_time" property="createTime"/>
+    </resultMap>
+
+    <select id="selectAll" resultMap="CampusMap">
+        SELECT id, name, address, contact_phone, is_center, create_time
+        FROM campuses
+        WHERE delete_flag = 0
+        ORDER BY create_time DESC
+    </select>
+
+    <select id="selectById" resultMap="CampusMap">
+        SELECT id, name, address, contact_phone, is_center, create_time, update_time
+        FROM campuses
+        WHERE id = #{id} AND delete_flag = 0
+    </select>
+
+    <insert id="insertCampus">
+        INSERT INTO campuses (id, name, address, contact_phone, is_center, create_time, update_time, delete_flag)
+        VALUES (#{campusId}, #{name}, #{address}, #{phone}, #{center}, #{createTime}, #{updateTime}, #{deleted})
     </insert>
+
+    <update id="updateCampus">
+        UPDATE campuses
+        SET name = #{name},
+            address = #{address},
+            contact_phone = #{phone},
+            is_center = #{center},
+            update_time = #{updateTime}
+        WHERE id = #{campusId} AND delete_flag = 0
+    </update>
+
+    <select id="existsByName" resultType="boolean">
+        SELECT COUNT(1)
+        FROM campuses
+        WHERE name = #{name} AND delete_flag = 0
+    </select>
+
+    <select id="selectUsersByCampusId" resultMap="CampusUserVOMap">
+        SELECT u.id, u.username, u.name, u.phone, u.email, u.role, u.create_time
+        FROM user u
+        WHERE u.campus_id = #{campusId}
+        AND u.delete_flag = 0
+        <if test="role != null and role != ''">
+            AND u.role = #{role}
+        </if>
+        ORDER BY u.create_time DESC
+        LIMIT #{offset}, #{limit}
+    </select>
+
+    <select id="countUsersByCampusId" resultType="long">
+        SELECT COUNT(1)
+        FROM user u
+        WHERE u.campus_id = #{campusId}
+        AND u.delete_flag = 0
+        <if test="role != null and role != ''">
+            AND u.role = #{role}
+        </if>
+    </select>
 
 </mapper>

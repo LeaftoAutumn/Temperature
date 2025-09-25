@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.system.mapper.SystemLogMapper">
+
+    <resultMap id="SystemLogMap" type="com.system.entity.SystemLog">
+        <id column="id" property="id"/>
+        <result column="user_id" property="userId"/>
+        <result column="user_name" property="userName"/>
+        <result column="user_role" property="userRole"/>
+        <result column="action" property="action"/>
+        <result column="action_type" property="actionType"/>
+        <result column="ip_address" property="ipAddress"/>
+        <result column="user_agent" property="userAgent"/>
+        <result column="details" property="details"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+        <result column="delete_flag" property="deleted"/>
+    </resultMap>
+
+    <resultMap id="SystemLogVOMap" type="com.system.vo.SystemLogVO">
+        <id column="id" property="id"/>
+        <result column="user_id" property="userId"/>
+        <result column="user_name" property="userName"/>
+        <result column="user_role" property="userRole"/>
+        <result column="action" property="action"/>
+        <result column="action_type" property="actionType"/>
+        <result column="ip_address" property="ipAddress"/>
+        <result column="user_agent" property="userAgent"/>
+        <result column="details" property="details" typeHandler="com.system.handler.JsonTypeHandler"/>
+        <result column="create_time" property="createTime"/>
+    </resultMap>
+
+    <insert id="insertSystemLog">
+        INSERT INTO system_logs (id, user_id, user_name, user_role, action, action_type,
+                                 ip_address, user_agent, details, create_time, update_time, delete_flag)
+        VALUES (#{id}, #{userId}, #{userName}, #{userRole}, #{action}, #{actionType},
+                #{ipAddress}, #{userAgent}, #{details}, #{createTime}, #{updateTime}, #{deleted})
+    </insert>
+
+    <select id="selectSystemLogs" resultMap="SystemLogVOMap">
+        SELECT
+        id, user_id, user_name, user_role, action, action_type,
+        ip_address, user_agent, details, create_time
+        FROM system_logs
+        WHERE delete_flag = 0
+        <if test="queryDTO.userId != null and queryDTO.userId != ''">
+            AND user_id = #{queryDTO.userId}
+        </if>
+        <if test="queryDTO.actionType != null and queryDTO.actionType != ''">
+            AND action_type = #{queryDTO.actionType}
+        </if>
+        <if test="queryDTO.startDate != null">
+            AND DATE(create_time) >= #{queryDTO.startDate}
+        </if>
+        <if test="queryDTO.endDate != null">
+            AND DATE(create_time) &lt;= #{queryDTO.endDate}
+        </if>
+        ORDER BY create_time DESC
+        LIMIT #{offset}, #{limit}
+    </select>
+
+    <select id="countSystemLogs" resultType="long">
+        SELECT COUNT(1)
+        FROM system_logs
+        WHERE delete_flag = 0
+        <if test="queryDTO.userId != null and queryDTO.userId != ''">
+            AND user_id = #{queryDTO.userId}
+        </if>
+        <if test="queryDTO.actionType != null and queryDTO.actionType != ''">
+            AND action_type = #{queryDTO.actionType}
+        </if>
+        <if test="queryDTO.startDate != null">
+            AND DATE(create_time) >= #{queryDTO.startDate}
+        </if>
+        <if test="queryDTO.endDate != null">
+            AND DATE(create_time) &lt;= #{queryDTO.endDate}
+        </if>
+    </select>
+
+</mapper>

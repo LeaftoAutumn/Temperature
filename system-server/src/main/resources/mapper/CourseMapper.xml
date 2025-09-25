@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.system.mapper.CourseMapper">
+
+    <resultMap id="CourseMap" type="com.system.entity.Course">
+        <id column="id" property="id"/>
+        <result column="coach_id" property="coachId"/>
+        <result column="student_id" property="studentId"/>
+        <result column="start_time" property="startTime"/>
+        <result column="end_time" property="endTime"/>
+        <result column="price" property="price"/>
+        <result column="status" property="status"/>
+        <result column="table_number" property="tableNumber"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+        <result column="delete_flag" property="deleted"/>
+    </resultMap>
+
+    <resultMap id="ReservationListItemVOMap" type="com.system.vo.ReservationListItemVO">
+        <id column="id" property="id"/>
+        <result column="student_id" property="studentId"/>
+        <result column="student_name" property="studentName"/>
+        <result column="coach_id" property="coachId"/>
+        <result column="coach_name" property="coachName"/>
+        <result column="start_time" property="startTime"/>
+        <result column="end_time" property="endTime"/>
+        <result column="duration" property="duration"/>
+        <result column="price" property="price"/>
+        <result column="status" property="status"/>
+        <result column="table_number" property="tableNumber"/>
+        <result column="create_time" property="createTime"/>
+    </resultMap>
+
+    <resultMap id="TimetableItemVOMap" type="com.system.vo.TimetableItemVO">
+        <id column="id" property="id"/>
+        <result column="date" property="date"/>
+        <result column="start_time" property="startTime"/>
+        <result column="end_time" property="endTime"/>
+        <result column="type" property="type"/>
+        <result column="title" property="title"/>
+        <result column="location" property="location"/>
+        <result column="table_number" property="tableNumber"/>
+        <result column="with_user_id" property="withUser.id"/>
+        <result column="with_user_name" property="withUser.name"/>
+        <result column="with_user_role" property="withUser.role"/>
+        <result column="status" property="status"/>
+    </resultMap>
+
+    <insert id="insertCourse">
+        INSERT INTO courses (id, coach_id, student_id, start_time, end_time, price, status, table_number, create_time, update_time, delete_flag)
+        VALUES (#{id}, #{coachId}, #{studentId}, #{startTime}, #{endTime}, #{price}, #{status}, #{tableNumber}, #{createTime}, #{updateTime}, #{deleted})
+    </insert>
+
+    <select id="selectById" resultMap="CourseMap">
+        SELECT * FROM courses WHERE id = #{id} AND delete_flag = 0
+    </select>
+
+    <select id="selectByStudentId" resultMap="CourseMap">
+        SELECT * FROM courses
+        WHERE student_id = #{studentId} AND delete_flag = 0
+        ORDER BY start_time DESC
+    </select>
+
+    <select id="selectByCoachId" resultMap="CourseMap">
+        SELECT * FROM courses
+        WHERE coach_id = #{coachId} AND delete_flag = 0
+        ORDER BY start_time DESC
+    </select>
+
+    <select id="selectReservationsByUserId" resultMap="ReservationListItemVOMap">
+        SELECT
+        c.id,
+        c.student_id,
+        s.name as student_name,
+        c.coach_id,
+        co.name as coach_name,
+        c.start_time,
+        c.end_time,
+        TIMESTAMPDIFF(MINUTE, c.start_time, c.end_time) as duration,
+        c.price,
+        c.status,
+        c.table_number,
+        c.create_time
+        FROM courses c
+        LEFT JOIN user s ON c.student_id = s.id
+        LEFT JOIN user co ON c.coach_id = co.id
+        WHERE (c.student_id = #{userId} OR c.coach_id = #{userId})
+        AND c.delete_flag = 0
+        <if test="queryDTO.status != null and queryDTO.status != ''">
+            AND c.status = #{queryDTO.status}
+        </if>
+        <if test="queryDTO.startDate != null">
+            AND DATE(c.start_time) >= #{queryDTO.startDate}
+        </if>
+        <if test="queryDTO.endDate != null">
+            AND DATE(c.start_time) &lt;= #{queryDTO.endDate}
+        </if>
+        ORDER BY c.start_time DESC
+        LIMIT #{offset}, #{limit}
+    </select>
+
+    <select id="countReservationsByUserId" resultType="long">
+        SELECT COUNT(1)
+        FROM courses c
+        WHERE (c.student_id = #{userId} OR c.coach_id = #{userId})
+        AND c.delete_flag = 0
+        <if test="queryDTO.status != null and queryDTO.status != ''">
+            AND c.status = #{queryDTO.status}
+        </if>
+        <if test="queryDTO.startDate != null">
+            AND DATE(c.start_time) >= #{queryDTO.startDate}
+        </if>
+        <if test="queryDTO.endDate != null">
+            AND DATE(c.start_time) &lt;= #{queryDTO.endDate}
+        </if>
+    </select>
+
+    <select id="selectTimetableByUserId" resultMap="TimetableItemVOMap">
+        SELECT
+            c.id,
+            DATE(c.start_time) as date,
+            c.start_time,
+            c.end_time,
+            'course' as type,
+            '乒乓球课程' as title,
+            camp.name as location,
+            c.table_number,
+            CASE
+                WHEN c.student_id = #{userId} THEN c.coach_id
+                ELSE c.student_id
+                END as with_user_id,
+            CASE
+                WHEN c.student_id = #{userId} THEN coach.name
+                ELSE student.name
+                END as with_user_name,
+            CASE
+                WHEN c.student_id = #{userId} THEN 'coach'
+                ELSE 'student'
+                END as with_user_role,
+            c.status
+        FROM courses c
+                 LEFT JOIN user student ON c.student_id = student.id
+                 LEFT JOIN user coach ON c.coach_id = coach.id
+                 LEFT JOIN campuses camp ON student.campus_id = camp.id
+        WHERE (c.student_id = #{userId} OR c.coach_id = #{userId})
+          AND c.delete_flag = 0
+          AND c.start_time >= #{startDate}
+          AND c.start_time &lt;= #{endDate}
+          AND c.status IN ('confirmed', 'completed')
+        ORDER BY c.start_time ASC
+    </select>
+
+    <update id="updateCourseStatus">
+        UPDATE courses
+        SET status = #{status}, update_time = NOW()
+        WHERE id = #{id} AND delete_flag = 0
+    </update>
+
+    <select id="existsConflict" resultType="boolean">
+        SELECT COUNT(1) > 0
+        FROM courses
+        WHERE coach_id = #{coachId}
+        AND delete_flag = 0
+        AND status IN ('pending', 'confirmed')
+        AND (
+        (start_time &lt; #{endTime} AND end_time > #{startTime})
+        )
+        <if test="excludeCourseId != null">
+            AND id != #{excludeCourseId}
+        </if>
+    </select>
+
+    <select id="getAvailableTimeSlots" resultType="java.time.LocalDateTime">
+        <!-- 这个查询需要根据具体的业务逻辑实现 -->
+        <!-- 这里只是一个示例 -->
+        SELECT #{date} + INTERVAL hour HOUR as available_time
+        FROM (
+        SELECT 9 as hour UNION SELECT 10 UNION SELECT 11 UNION SELECT 14
+        UNION SELECT 15 UNION SELECT 16 UNION SELECT 17 UNION SELECT 18
+        ) hours
+        WHERE NOT EXISTS (
+        SELECT 1 FROM courses
+        WHERE coach_id = #{coachId}
+        AND DATE(start_time) = #{date}
+        AND HOUR(start_time) = hour
+        AND delete_flag = 0
+        AND status IN ('pending', 'confirmed')
+        )
+    </select>
+
+</mapper>

@@ -2,26 +2,25 @@ package com.system.mapper;
 
 import com.system.entity.User;
 import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
+import java.util.UUID;
 
 @Mapper
 public interface UserMapper {
 
-    /**
-     * 新增用户
-     *
-     * @param userList 用户列表
-     */
-    void createUser(List<User> userList);
+    User selectByUsername(@Param("username") String username);
 
-    /**
-     * 根据用户名查询用户
-     *
-     * @param username 用户名
-     * @return 用户信息
-     */
-    @Select("select * from user where username = #{username}")
-    User getByUsername(String username);
+    User selectById(@Param("id") UUID id);
+
+    int insertUser(User user);
+
+    boolean existsByUsername(@Param("username") String username);
+
+    boolean existsByPhone(@Param("phone") String phone);
+
+    List<User> selectUsersByCampusId(@Param("campusId") UUID campusId);
+
+    int updateUser(User user);
 }

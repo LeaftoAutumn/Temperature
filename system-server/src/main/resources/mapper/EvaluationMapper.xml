@@ -1,0 +1,220 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.system.mapper.EvaluationMapper">
+
+    <resultMap id="EvaluationMap" type="com.system.entity.Evaluation">
+        <id column="id" property="id"/>
+        <result column="course_id" property="courseId"/>
+        <result column="from_user_id" property="fromUserId"/>
+        <result column="to_user_id" property="toUserId"/>
+        <result column="content" property="content"/>
+        <result column="rating" property="rating"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+        <result column="delete_flag" property="deleted"/>
+    </resultMap>
+
+    <resultMap id="PendingEvaluationVOMap" type="com.system.vo.PendingEvaluationVO">
+        <result column="course_id" property="courseId"/>
+        <result column="start_time" property="courseDate"/>
+        <result column="opponent_id" property="opponentId"/>
+        <result column="opponent_name" property="opponentName"/>
+        <result column="opponent_role" property="opponentRole"/>
+        <result column="duration" property="courseDuration"/>
+        <result column="table_number" property="tableNumber"/>
+    </resultMap>
+
+    <resultMap id="EvaluationDetailVOMap" type="com.system.vo.EvaluationDetailVO">
+        <id column="id" property="id"/>
+        <result column="course_id" property="courseId"/>
+        <result column="from_user_id" property="fromUserId"/>
+        <result column="from_user_name" property="fromUserName"/>
+        <result column="from_user_role" property="fromUserRole"/>
+        <result column="to_user_id" property="toUserId"/>
+        <result column="to_user_name" property="toUserName"/>
+        <result column="to_user_role" property="toUserRole"/>
+        <result column="rating" property="rating"/>
+        <result column="content" property="content"/>
+        <result column="create_time" property="createTime"/>
+        <result column="course_start_time" property="courseInfo.startTime"/>
+        <result column="course_end_time" property="courseInfo.endTime"/>
+        <result column="course_table_number" property="courseInfo.tableNumber"/>
+        <result column="course_status" property="courseInfo.status"/>
+    </resultMap>
+
+    <resultMap id="EvaluationStatsVOMap" type="com.system.vo.EvaluationStatsVO">
+        <result column="total_received" property="totalReceived"/>
+        <result column="average_rating" property="averageRating"/>
+        <result column="last_evaluation_time" property="lastEvaluationTime"/>
+    </resultMap>
+
+    <insert id="insertEvaluation">
+        INSERT INTO evaluations (id, course_id, from_user_id, to_user_id, content, rating, create_time, update_time, delete_flag)
+        VALUES (#{id}, #{courseId}, #{fromUserId}, #{toUserId}, #{content}, #{rating}, #{createTime}, #{updateTime}, #{deleted})
+    </insert>
+
+    <select id="selectById" resultMap="EvaluationMap">
+        SELECT * FROM evaluations WHERE id = #{id} AND delete_flag = 0
+    </select>
+
+    <select id="existsByCourseAndUsers" resultType="boolean">
+        SELECT COUNT(1) > 0
+        FROM evaluations
+        WHERE course_id = #{courseId}
+          AND from_user_id = #{fromUserId}
+          AND to_user_id = #{toUserId}
+          AND delete_flag = 0
+    </select>
+
+    <select id="selectPendingEvaluations" resultMap="PendingEvaluationVOMap">
+        SELECT
+            c.id as course_id,
+            c.start_time,
+            CASE
+                WHEN c.student_id = #{userId} THEN c.coach_id
+                ELSE c.student_id
+                END as opponent_id,
+            CASE
+                WHEN c.student_id = #{userId} THEN coach.name
+                ELSE student.name
+                END as opponent_name,
+            CASE
+                WHEN c.student_id = #{userId} THEN 'coach'
+                ELSE 'student'
+                END as opponent_role,
+            TIMESTAMPDIFF(MINUTE, c.start_time, c.end_time) as duration,
+            c.table_number
+        FROM courses c
+                 LEFT JOIN user student ON c.student_id = student.id
+                 LEFT JOIN user coach ON c.coach_id = coach.id
+        WHERE (c.student_id = #{userId} OR c.coach_id = #{userId})
+          AND c.status = 'completed'
+          AND c.delete_flag = 0
+          AND NOT EXISTS (
+            SELECT 1 FROM evaluations e
+            WHERE e.course_id = c.id
+              AND e.from_user_id = #{userId}
+              AND e.delete_flag = 0
+        )
+          AND c.end_time &lt;= NOW()
+        ORDER BY c.start_time DESC
+    </select>
+
+    <select id="selectReceivedEvaluations" resultMap="EvaluationDetailVOMap">
+        SELECT
+        e.id,
+        e.course_id,
+        e.from_user_id,
+        from_user.name as from_user_name,
+        from_user.role as from_user_role,
+        e.to_user_id,
+        to_user.name as to_user_name,
+        to_user.role as to_user_role,
+        e.rating,
+        e.content,
+        e.create_time,
+        c.start_time as course_start_time,
+        c.end_time as course_end_time,
+        c.table_number as course_table_number,
+        c.status as course_status
+        FROM evaluations e
+        LEFT JOIN user from_user ON e.from_user_id = from_user.id
+        LEFT JOIN user to_user ON e.to_user_id = to_user.id
+        LEFT JOIN courses c ON e.course_id = c.id
+        WHERE e.to_user_id = #{userId}
+        AND e.delete_flag = 0
+        <if test="queryDTO.rating != null">
+            AND e.rating = #{queryDTO.rating}
+        </if>
+        ORDER BY e.create_time DESC
+        LIMIT #{offset}, #{limit}
+    </select>
+
+    <select id="countReceivedEvaluations" resultType="long">
+        SELECT COUNT(1)
+        FROM evaluations e
+        WHERE e.to_user_id = #{userId}
+        AND e.delete_flag = 0
+        <if test="queryDTO.rating != null">
+            AND e.rating = #{queryDTO.rating}
+        </if>
+    </select>
+
+    <select id="selectGivenEvaluations" resultMap="EvaluationDetailVOMap">
+        SELECT
+            e.id,
+            e.course_id,
+            e.from_user_id,
+            from_user.name as from_user_name,
+            from_user.role as from_user_role,
+            e.to_user_id,
+            to_user.name as to_user_name,
+            to_user.role as to_user_role,
+            e.rating,
+            e.content,
+            e.create_time,
+            c.start_time as course_start_time,
+            c.end_time as course_end_time,
+            c.table_number as course_table_number,
+            c.status as course_status
+        FROM evaluations e
+                 LEFT JOIN user from_user ON e.from_user_id = from_user.id
+                 LEFT JOIN user to_user ON e.to_user_id = to_user.id
+                 LEFT JOIN courses c ON e.course_id = c.id
+        WHERE e.from_user_id = #{userId}
+          AND e.delete_flag = 0
+        ORDER BY e.create_time DESC
+        LIMIT #{offset}, #{limit}
+    </select>
+
+    <select id="countGivenEvaluations" resultType="long">
+        SELECT COUNT(1)
+        FROM evaluations e
+        WHERE e.from_user_id = #{userId}
+          AND e.delete_flag = 0
+    </select>
+
+    <select id="selectByCourseId" resultMap="EvaluationDetailVOMap">
+        SELECT
+            e.id,
+            e.course_id,
+            e.from_user_id,
+            from_user.name as from_user_name,
+            from_user.role as from_user_role,
+            e.to_user_id,
+            to_user.name as to_user_name,
+            to_user.role as to_user_role,
+            e.rating,
+            e.content,
+            e.create_time,
+            c.start_time as course_start_time,
+            c.end_time as course_end_time,
+            c.table_number as course_table_number,
+            c.status as course_status
+        FROM evaluations e
+                 LEFT JOIN user from_user ON e.from_user_id = from_user.id
+                 LEFT JOIN user to_user ON e.to_user_id = to_user.id
+                 LEFT JOIN courses c ON e.course_id = c.id
+        WHERE e.course_id = #{courseId}
+          AND e.delete_flag = 0
+        ORDER BY e.create_time DESC
+    </select>
+
+    <select id="selectEvaluationStats" resultMap="EvaluationStatsVOMap">
+        SELECT
+            COUNT(1) as total_received,
+            AVG(rating) as average_rating,
+            MAX(create_time) as last_evaluation_time
+        FROM evaluations
+        WHERE to_user_id = #{userId}
+          AND delete_flag = 0
+    </select>
+
+    <select id="selectByToUserId" resultMap="EvaluationMap">
+        SELECT * FROM evaluations
+        WHERE to_user_id = #{toUserId} AND delete_flag = 0
+        ORDER BY create_time DESC
+    </select>
+
+</mapper>

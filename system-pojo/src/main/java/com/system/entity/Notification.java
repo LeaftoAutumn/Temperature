@@ -1,3 +1,4 @@
+// Notification.java
 package com.system.entity;
 
 import lombok.AllArgsConstructor;
@@ -14,30 +15,18 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Notification implements Serializable {
-
     private static final long serialVersionUID = 1L;
 
-    // 系统通知ID
-    private UUID notificationId;
-
-    // 用户ID
+    private UUID id;
     private UUID userId;
-
-    // 通知标题
     private String title;
-
-    // 通知内容
     private String content;
-
-    // 是否已读
-    private Boolean read;
-
-    // 创建时间
+    private String type;
+    private UUID relatedId;
+    private String relatedType;
+    private Boolean isRead;
     private LocalDateTime createTime;
-
-    // 更新时间
     private LocalDateTime updateTime;
-
-    // 是否删除
     private Boolean deleted;
+    private String metadata; // JSON格式存储
 }
