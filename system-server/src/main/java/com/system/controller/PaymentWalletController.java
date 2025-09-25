@@ -29,9 +29,11 @@ public class PaymentWalletController {
     @ApiOperation("获取学员账户余额")
     public BalanceVO getStudentBalance(@PathVariable String studentId,
                                      HttpServletRequest request) {
-        String currentUserId = (String) request.getAttribute("userId");
+        /*String currentUserId = (String) request.getAttribute("userId");
         log.info("获取学员账户余额: studentId={}, currentUserId={}", studentId, currentUserId);
-        return paymentService.getStudentBalance(studentId, currentUserId);
+        return paymentService.getStudentBalance(studentId, currentUserId);*/
+        log.info("获取学员账户余额: studentId={}", studentId);
+        return paymentService.getStudentBalance(studentId);
     }
 
     @PostMapping("/top-ups")

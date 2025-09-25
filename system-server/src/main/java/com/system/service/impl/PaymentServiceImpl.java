@@ -36,7 +36,7 @@ public class PaymentServiceImpl implements PaymentService {
     @Autowired
     private UserMapper userMapper;
 
-    @Override
+    /*@Override
     public BalanceVO getStudentBalance(String studentId, String currentUserId) {
         log.info("获取学员账户余额: studentId={}, currentUserId={}", studentId, currentUserId);
         
@@ -60,6 +60,27 @@ public class PaymentServiceImpl implements PaymentService {
         
         User studentUser = userMapper.selectById(studentUUID);
         
+        return BalanceVO.builder()
+                .balance(student.getBalance())
+                .studentId(UUID.fromString(studentId))
+                .studentName(studentUser != null ? studentUser.getName() : "未知")
+                .build();
+    }*/
+
+    @Override
+    public BalanceVO getStudentBalance(String studentId) {
+        log.info("获取学员账户余额: studentId={}", studentId);
+
+        UUID studentUUID = UUID.fromString(studentId);
+
+        // 查询学员信息
+        Student student = studentMapper.selectByUserId(studentUUID);
+        if (student == null) {
+            throw new RuntimeException("学员不存在");
+        }
+
+        User studentUser = userMapper.selectById(studentUUID);
+
         return BalanceVO.builder()
                 .balance(student.getBalance())
                 .studentId(UUID.fromString(studentId))

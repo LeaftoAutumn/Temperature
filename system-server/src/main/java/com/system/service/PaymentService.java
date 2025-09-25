@@ -9,8 +9,10 @@ import com.system.vo.*;
 import java.math.BigDecimal;
 
 public interface PaymentService {
+
+    /*BalanceVO getStudentBalance(String studentId, String currentUserId);*/
     
-    BalanceVO getStudentBalance(String studentId, String currentUserId);
+    BalanceVO getStudentBalance(String studentId);
     
     TopUpOrderVO createTopUpOrder(TopUpCreateDTO createDTO, String currentUserId);
     
