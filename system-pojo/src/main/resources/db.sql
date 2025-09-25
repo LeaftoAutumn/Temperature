@@ -382,6 +382,10 @@ CREATE TABLE `tournament_registration`
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4 COMMENT ='比赛报名表';
 
+-- 修改user表的role字段，添加SUPER_ADMIN角色
+ALTER TABLE user
+    MODIFY COLUMN role ENUM('STUDENT', 'COACH', 'ADMIN', 'SUPER_ADMIN') NOT NULL COMMENT '用户角色';
+
 SET FOREIGN_KEY_CHECKS = 1;
 
 -- 恢复原始设置
