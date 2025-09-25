@@ -9,7 +9,7 @@ import com.system.vo.MatchRequestVO;
 
 public interface MatchRequestService {
     
-    MatchRequestVO createMatchRequest(MatchRequestCreateDTO createDTO, String currentUserId);
+    MatchRequestVO createMatchRequest(MatchRequestCreateDTO createDTO);
     
     MatchRequestPageVO getMatchRequests(MatchRequestQueryDTO queryDTO, String currentUserId, String userRole);
     

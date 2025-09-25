@@ -8,14 +8,15 @@ import com.system.vo.CoachPageVO;
 import com.system.vo.StudentListItemVO;
 
 import java.util.List;
+import java.util.UUID;
 
 public interface CoachService {
     
     CoachPageVO getCoaches(CoachQueryDTO queryDTO);
     
-    CoachDetailVO getCoachDetail(String coachId);
+    CoachDetailVO getCoachDetail(UUID coachId);
     
     List<CoachListItemVO> getStudentCoaches(String studentId);
     
-    List<StudentListItemVO> getCoachStudents(String coachId, String currentUserId);
+    List<StudentListItemVO> getCoachStudents(UUID coachId, String currentUserId);
 }
