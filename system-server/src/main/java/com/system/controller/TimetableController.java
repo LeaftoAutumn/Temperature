@@ -30,8 +30,7 @@ public class TimetableController {
     public List<TimetableItemVO> getUserTimetable(@PathVariable String userId,
                                                 @Valid TimetableQueryDTO queryDTO,
                                                 HttpServletRequest request) {
-        String currentUserId = (String) request.getAttribute("userId");
-        log.info("获取用户课表: userId={}, currentUserId={}", userId, currentUserId);
-        return reservationService.getUserTimetable(userId, queryDTO, currentUserId);
+        log.info("获取用户课表: userId={}", userId);
+        return reservationService.getUserTimetable(userId, queryDTO);
     }
 }

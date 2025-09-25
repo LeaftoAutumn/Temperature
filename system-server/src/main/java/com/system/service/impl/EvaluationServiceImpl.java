@@ -204,6 +204,7 @@ public class EvaluationServiceImpl implements EvaluationService {
         
         // 获取基本统计信息
         EvaluationStatsVO stats = evaluationMapper.selectEvaluationStats(userUUID);
+        stats.setRatingDistribution(evaluationMapper.selectRatingDistribution(userId));
         if (stats == null) {
             stats = EvaluationStatsVO.builder()
                     .totalReceived(0)

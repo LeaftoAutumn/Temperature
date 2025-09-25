@@ -37,20 +37,10 @@ public class PaymentServiceImpl implements PaymentService {
     private UserMapper userMapper;
 
     @Override
-    public BalanceVO getStudentBalance(String studentId, String currentUserId) {
-        log.info("获取学员账户余额: studentId={}, currentUserId={}", studentId, currentUserId);
+    public BalanceVO getStudentBalance(String studentId) {
+        log.info("获取学员账户余额: studentId={}", studentId);
         
         UUID studentUUID = UUID.fromString(studentId);
-        UUID currentUserUUID = UUID.fromString(currentUserId);
-        
-        // 权限验证：学员只能查看自己的余额，管理员可以查看所有
-        if (!studentUUID.equals(currentUserUUID)) {
-            User currentUser = userMapper.selectById(currentUserUUID);
-            if (currentUser == null || (!"super_admin".equals(currentUser.getRole()) &&
-                !"campus_admin".equals(currentUser.getRole()))) {
-                throw new RuntimeException("无权查看他人余额");
-            }
-        }
         
         // 查询学员信息
         Student student = studentMapper.selectByUserId(studentUUID);

@@ -101,7 +101,7 @@
           AND c.is_approved = 1
     </select>
 
-    <select id="selectcoach" resultMap="CoachListItemVOMap">
+    <select id="selectCoaches" resultMap="CoachListItemVOMap">
         SELECT
         c.user_id,
         u.name,
@@ -132,7 +132,7 @@
         LIMIT #{offset}, #{limit}
     </select>
 
-    <select id="countcoach" resultType="long">
+    <select id="countCoaches" resultType="long">
         SELECT COUNT(1)
         FROM coach c
         JOIN user u ON c.user_id = u.id
@@ -161,7 +161,7 @@
           AND deleted = 0
     </select>
 
-    <select id="selectStudentcoach" resultMap="CoachListItemVOMap">
+    <select id="selectStudentCoaches" resultMap="CoachListItemVOMap">
         SELECT
             c.user_id,
             u.name,

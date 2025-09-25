@@ -205,13 +205,8 @@ public class ReservationServiceImpl implements ReservationService {
     }
 
     @Override
-    public List<TimetableItemVO> getUserTimetable(String userId, TimetableQueryDTO queryDTO, String currentUserId) {
+    public List<TimetableItemVO> getUserTimetable(String userId, TimetableQueryDTO queryDTO) {
         log.info("获取用户课表: userId={}", userId);
-        
-        // 验证权限（只能查看自己的课表）
-        if (!userId.equals(currentUserId)) {
-            throw new RuntimeException("无权查看他人课表");
-        }
         
         UUID userUUID = UUID.fromString(userId);
         

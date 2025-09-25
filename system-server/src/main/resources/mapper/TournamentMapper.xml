@@ -50,7 +50,7 @@
         WHERE id = #{id} AND deleted = 0
     </update>
 
-    <select id="selecttournament" resultMap="TournamentVOMap">
+    <select id="selectTournaments" resultMap="TournamentVOMap">
         SELECT
         id, name, event_date, group_type, format, status, entry_fee, create_time
         FROM tournament

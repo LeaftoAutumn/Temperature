@@ -15,7 +15,7 @@ public interface ReservationService {
     
     ReservationDetailVO updateReservationStatus(String reservationId, UpdateReservationStatusDTO updateDTO, String currentUserId);
     
-    List<TimetableItemVO> getUserTimetable(String userId, TimetableQueryDTO queryDTO, String currentUserId);
+    List<TimetableItemVO> getUserTimetable(String userId, TimetableQueryDTO queryDTO);
     
     CancellationRemainingVO getRemainingCancellations(String currentUserId);
     
