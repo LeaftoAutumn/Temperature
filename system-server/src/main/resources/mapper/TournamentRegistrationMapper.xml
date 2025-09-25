@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.system.mapper.TournamentRegistrationMapper">
+
+    <resultMap id="TournamentRegistrationMap" type="com.system.entity.TournamentRegistration">
+        <id column="id" property="id"/>
+        <result column="student_id" property="studentId"/>
+        <result column="tournament_id" property="tournamentId"/>
+        <result column="fee_paid" property="feePaid"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+        <result column="delete_flag" property="deleted"/>
+    </resultMap>
+
+    <insert id="insertRegistration">
+        INSERT INTO tournament_registrations (id, student_id, tournament_id, fee_paid,
+                                              create_time, update_time, delete_flag)
+        VALUES (#{id}, #{studentId}, #{tournamentId}, #{feePaid},
+                #{createTime}, #{updateTime}, #{deleted})
+    </insert>
+
+    <select id="selectById" resultMap="TournamentRegistrationMap">
+        SELECT * FROM tournament_registrations WHERE id = #{id} AND delete_flag = 0
+    </select>
+
+    <select id="selectByStudentAndTournament" resultMap="TournamentRegistrationMap">
+        SELECT * FROM tournament_registrations
+        WHERE student_id = #{studentId} AND tournament_id = #{tournamentId} AND delete_flag = 0
+    </select>
+
+    <select id="selectByTournamentId" resultMap="TournamentRegistrationMap">
+        SELECT * FROM tournament_registrations
+        WHERE tournament_id = #{tournamentId} AND delete_flag = 0
+    </select>
+
+    <update id="updateFeePaidStatus">
+        UPDATE tournament_registrations
+        SET fee_paid = #{feePaid}, update_time = NOW()
+        WHERE id = #{id} AND delete_flag = 0
+    </update>
+
+    <select id="countRegistrationsByTournament" resultType="int">
+        SELECT COUNT(1) FROM tournament_registrations
+        WHERE tournament_id = #{tournamentId} AND delete_flag = 0
+    </select>
+
+</mapper>

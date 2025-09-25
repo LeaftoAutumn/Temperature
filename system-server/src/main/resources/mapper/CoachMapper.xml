@@ -16,6 +16,41 @@
         <result column="delete_flag" property="deleted"/>
     </resultMap>
 
+    <resultMap id="CoachListItemVOMap" type="com.system.vo.CoachListItemVO">
+        <result column="user_id" property="userId"/>
+        <result column="name" property="name"/>
+        <result column="gender" property="gender"/>
+        <result column="birth_date" property="birthDate"/>
+        <result column="level" property="level"/>
+        <result column="hourly_rate" property="hourlyRate"/>
+        <result column="photo_url" property="photoUrl"/>
+        <result column="awards" property="awards"/>
+    </resultMap>
+
+    <resultMap id="CoachDetailVOMap" type="com.system.vo.CoachDetailVO">
+        <result column="user_id" property="userId"/>
+        <result column="name" property="name"/>
+        <result column="gender" property="gender"/>
+        <result column="birth_date" property="birthDate"/>
+        <result column="level" property="level"/>
+        <result column="hourly_rate" property="hourlyRate"/>
+        <result column="photo_url" property="photoUrl"/>
+        <result column="awards" property="awards"/>
+        <result column="phone" property="phone"/>
+        <result column="email" property="email"/>
+        <result column="max_students" property="maxStudents"/>
+        <result column="is_approved" property="isApproved"/>
+        <result column="create_time" property="createdTime"/>
+    </resultMap>
+
+    <resultMap id="StudentListItemVOMap" type="com.system.vo.StudentListItemVO">
+        <result column="user_id" property="userId"/>
+        <result column="name" property="name"/>
+        <result column="gender" property="gender"/>
+        <result column="birth_date" property="birthDate"/>
+        <result column="phone" property="phone"/>
+    </resultMap>
+
     <select id="selectByUserId" resultMap="CoachMap">
         SELECT * FROM coaches
         WHERE user_id = #{userId} AND delete_flag = 0
@@ -42,5 +77,125 @@
             update_time = #{updateTime}
         WHERE user_id = #{userId} AND delete_flag = 0
     </update>
+
+    <select id="selectCoachDetail" resultMap="CoachDetailVOMap">
+        SELECT
+            c.user_id,
+            u.name,
+            u.gender,
+            u.birth_date,
+            c.level,
+            c.hourly_rate,
+            c.photo_url,
+            c.awards,
+            u.phone,
+            u.email,
+            c.max_students,
+            c.is_approved,
+            c.create_time
+        FROM coaches c
+                 JOIN user u ON c.user_id = u.id
+        WHERE c.user_id = #{coachId}
+          AND c.delete_flag = 0
+          AND u.delete_flag = 0
+          AND c.is_approved = 1
+    </select>
+
+    <select id="selectCoaches" resultMap="CoachListItemVOMap">
+        SELECT
+        c.user_id,
+        u.name,
+        u.gender,
+        u.birth_date,
+        c.level,
+        c.hourly_rate,
+        c.photo_url,
+        c.awards
+        FROM coaches c
+        JOIN user u ON c.user_id = u.id
+        WHERE c.delete_flag = 0
+        AND u.delete_flag = 0
+        AND u.campus_id = #{queryDTO.campusId}
+        <if test="queryDTO.isApproved != null">
+            AND c.is_approved = #{queryDTO.isApproved}
+        </if>
+        <if test="queryDTO.name != null and queryDTO.name != ''">
+            AND u.name LIKE CONCAT('%', #{queryDTO.name}, '%')
+        </if>
+        <if test="queryDTO.gender != null and queryDTO.gender != ''">
+            AND u.gender = #{queryDTO.gender}
+        </if>
+        <if test="queryDTO.level != null and queryDTO.level != ''">
+            AND c.level = #{queryDTO.level}
+        </if>
+        ORDER BY c.create_time DESC
+        LIMIT #{offset}, #{limit}
+    </select>
+
+    <select id="countCoaches" resultType="long">
+        SELECT COUNT(1)
+        FROM coaches c
+        JOIN user u ON c.user_id = u.id
+        WHERE c.delete_flag = 0
+        AND u.delete_flag = 0
+        AND u.campus_id = #{queryDTO.campusId}
+        <if test="queryDTO.isApproved != null">
+            AND c.is_approved = #{queryDTO.isApproved}
+        </if>
+        <if test="queryDTO.name != null and queryDTO.name != ''">
+            AND u.name LIKE CONCAT('%', #{queryDTO.name}, '%')
+        </if>
+        <if test="queryDTO.gender != null and queryDTO.gender != ''">
+            AND u.gender = #{queryDTO.gender}
+        </if>
+        <if test="queryDTO.level != null and queryDTO.level != ''">
+            AND c.level = #{queryDTO.level}
+        </if>
+    </select>
+
+    <select id="countCurrentStudents" resultType="int">
+        SELECT COUNT(1)
+        FROM coach_student_matches
+        WHERE coach_id = #{coachId}
+          AND status = 'accepted'
+          AND delete_flag = 0
+    </select>
+
+    <select id="selectStudentCoaches" resultMap="CoachListItemVOMap">
+        SELECT
+            c.user_id,
+            u.name,
+            u.gender,
+            u.birth_date,
+            c.level,
+            c.hourly_rate,
+            c.photo_url,
+            c.awards
+        FROM coach_student_matches csm
+                 JOIN coaches c ON csm.coach_id = c.user_id
+                 JOIN user u ON c.user_id = u.id
+        WHERE csm.student_id = #{studentId}
+          AND csm.status = 'accepted'
+          AND csm.delete_flag = 0
+          AND c.delete_flag = 0
+          AND u.delete_flag = 0
+        ORDER BY csm.update_time DESC
+    </select>
+
+    <select id="selectCoachStudents" resultMap="StudentListItemVOMap">
+        SELECT
+            u.id as user_id,
+            u.name,
+            u.gender,
+            u.birth_date,
+            u.phone
+        FROM coach_student_matches csm
+                 JOIN user u ON csm.student_id = u.id
+        WHERE csm.coach_id = #{coachId}
+          AND csm.status = 'accepted'
+          AND csm.delete_flag = 0
+          AND u.delete_flag = 0
+        ORDER BY csm.update_time DESC
+    </select>
 
 </mapper>

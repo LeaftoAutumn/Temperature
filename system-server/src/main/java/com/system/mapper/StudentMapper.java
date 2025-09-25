@@ -24,4 +24,6 @@ public interface StudentMapper {
                           @Param("lastCancelMonth") int lastCancelMonth);
 
     int updateStudent(Student student);
+
+    int addBalance(@Param("userId") UUID userId, @Param("amount") BigDecimal amount);
 }

@@ -60,4 +60,10 @@
         WHERE user_id = #{userId} AND delete_flag = 0
     </update>
 
+    <update id="addBalance">
+        UPDATE students
+        SET balance = balance + #{amount}, update_time = NOW()
+        WHERE user_id = #{userId} AND delete_flag = 0
+    </update>
+
 </mapper>

@@ -13,6 +13,17 @@
         <result column="delete_flag" property="deleted"/>
     </resultMap>
 
+    <resultMap id="MatchRequestDetailVOMap" type="com.system.vo.MatchRequestDetailVO">
+        <id column="id" property="id"/>
+        <result column="student_id" property="studentId"/>
+        <result column="student_name" property="studentName"/>
+        <result column="coach_id" property="coachId"/>
+        <result column="coach_name" property="coachName"/>
+        <result column="status" property="status"/>
+        <result column="create_time" property="createdTime"/>
+        <result column="update_time" property="updatedTime"/>
+    </resultMap>
+
     <select id="selectByStudentAndCoach" resultMap="CoachStudentMatchMap">
         SELECT * FROM coach_student_matches
         WHERE student_id = #{studentId}
@@ -45,6 +56,97 @@
         WHERE coach_id = #{coachId}
           AND delete_flag = 0
           AND status = 'accepted'
+    </select>
+
+    <insert id="insertMatchRequest">
+        INSERT INTO coach_student_matches (id, student_id, coach_id, status, create_time, update_time, delete_flag)
+        VALUES (#{id}, #{studentId}, #{coachId}, #{status}, #{createTime}, #{updateTime}, #{deleted})
+    </insert>
+
+    <select id="selectById" resultMap="CoachStudentMatchMap">
+        SELECT * FROM coach_student_matches WHERE id = #{id} AND delete_flag = 0
+    </select>
+
+    <select id="selectMatchRequests" resultMap="MatchRequestDetailVOMap">
+        SELECT
+        csm.id,
+        csm.student_id,
+        s.name as student_name,
+        csm.coach_id,
+        c.name as coach_name,
+        csm.status,
+        csm.create_time,
+        csm.update_time
+        FROM coach_student_matches csm
+        JOIN user s ON csm.student_id = s.id
+        JOIN user c ON csm.coach_id = c.id
+        WHERE csm.delete_flag = 0
+        AND s.delete_flag = 0
+        AND c.delete_flag = 0
+        <choose>
+            <when test="userRole == 'student'">
+                AND csm.student_id = #{userId}
+            </when>
+            <when test="userRole == 'coach'">
+                AND csm.coach_id = #{userId}
+            </when>
+        </choose>
+        <if test="queryDTO.status != null and queryDTO.status != ''">
+            AND csm.status = #{queryDTO.status}
+        </if>
+        ORDER BY csm.create_time DESC
+        LIMIT #{offset}, #{limit}
+    </select>
+
+    <select id="countMatchRequests" resultType="long">
+        SELECT COUNT(1)
+        FROM coach_student_matches csm
+        JOIN user s ON csm.student_id = s.id
+        JOIN user c ON csm.coach_id = c.id
+        WHERE csm.delete_flag = 0
+        AND s.delete_flag = 0
+        AND c.delete_flag = 0
+        <choose>
+            <when test="userRole == 'student'">
+                AND csm.student_id = #{userId}
+            </when>
+            <when test="userRole == 'coach'">
+                AND csm.coach_id = #{userId}
+            </when>
+        </choose>
+        <if test="queryDTO.status != null and queryDTO.status != ''">
+            AND csm.status = #{queryDTO.status}
+        </if>
+    </select>
+
+    <select id="countAcceptedMatchesByStudent" resultType="int">
+        SELECT COUNT(1)
+        FROM coach_student_matches
+        WHERE student_id = #{studentId}
+          AND status = 'accepted'
+          AND delete_flag = 0
+    </select>
+
+    <select id="countAcceptedMatchesByCoach" resultType="int">
+        SELECT COUNT(1)
+        FROM coach_student_matches
+        WHERE coach_id = #{coachId}
+          AND status = 'accepted'
+          AND delete_flag = 0
+    </select>
+
+    <select id="selectAcceptedMatchesByStudent" resultMap="CoachStudentMatchMap">
+        SELECT * FROM coach_student_matches
+        WHERE student_id = #{studentId}
+          AND status = 'accepted'
+          AND delete_flag = 0
+    </select>
+
+    <select id="selectAcceptedMatchesByCoach" resultMap="CoachStudentMatchMap">
+        SELECT * FROM coach_student_matches
+        WHERE coach_id = #{coachId}
+          AND status = 'accepted'
+          AND delete_flag = 0
     </select>
 
 </mapper>

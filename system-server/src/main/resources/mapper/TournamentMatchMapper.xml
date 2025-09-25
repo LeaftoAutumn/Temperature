@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.system.mapper.TournamentMatchMapper">
+
+    <resultMap id="TournamentMatchMap" type="com.system.entity.TournamentMatch">
+        <id column="id" property="id"/>
+        <result column="tournament_id" property="tournamentId"/>
+        <result column="group_name" property="groupName"/>
+        <result column="player1_id" property="player1Id"/>
+        <result column="player2_id" property="player2Id"/>
+        <result column="scheduled_time" property="scheduledTime"/>
+        <result column="result" property="result"/>
+        <result column="winner_id" property="winnerId"/>
+        <result column="status" property="status"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+        <result column="delete_flag" property="deleted"/>
+    </resultMap>
+
+    <resultMap id="TournamentMatchVOMap" type="com.system.vo.TournamentMatchVO">
+        <id column="id" property="id"/>
+        <result column="tournament_id" property="tournamentId"/>
+        <result column="group_name" property="groupName"/>
+        <result column="player1_id" property="player1Id"/>
+        <result column="player2_id" property="player2Id"/>
+        <result column="player1_name" property="player1Name"/>
+        <result column="player2_name" property="player2Name"/>
+        <result column="scheduled_time" property="scheduledTime"/>
+        <result column="result" property="result"/>
+        <result column="winner_id" property="winnerId"/>
+        <result column="status" property="status"/>
+    </resultMap>
+
+    <resultMap id="TournamentGroupVOMap" type="com.system.vo.TournamentGroupVO">
+        <result column="group_name" property="groupName"/>
+        <collection property="players" ofType="com.system.vo.PlayerInfoVO"
+                    resultMap="PlayerInfoVOMap" columnPrefix="player_"/>
+        <collection property="matches" ofType="com.system.vo.TournamentMatchVO"
+                    resultMap="TournamentMatchVOMap" columnPrefix="match_"/>
+    </resultMap>
+
+    <resultMap id="PlayerInfoVOMap" type="com.system.vo.PlayerInfoVO">
+        <result column="user_id" property="userId"/>
+        <result column="name" property="name"/>
+        <result column="gender" property="gender"/>
+        <result column="age" property="age"/>
+    </resultMap>
+
+    <insert id="insertMatch">
+        INSERT INTO tournament_matches (id, tournament_id, group_name, player1_id, player2_id,
+                                        scheduled_time, result, winner_id, status,
+                                        create_time, update_time, delete_flag)
+        VALUES (#{id}, #{tournamentId}, #{groupName}, #{player1Id}, #{player2Id},
+                #{scheduledTime}, #{result}, #{winnerId}, #{status},
+                #{createTime}, #{updateTime}, #{deleted})
+    </insert>
+
+    <select id="selectById" resultMap="TournamentMatchMap">
+        SELECT * FROM tournament_matches WHERE id = #{id} AND delete_flag = 0
+    </select>
+
+    <update id="updateMatchResult">
+        UPDATE tournament_matches
+        SET result = #{result},
+            winner_id = #{winnerId},
+            status = #{status},
+            update_time = #{updateTime}
+        WHERE id = #{id} AND delete_flag = 0
+    </update>
+
+    <select id="selectByTournamentId" resultMap="TournamentMatchVOMap">
+        SELECT
+            tm.id,
+            tm.tournament_id,
+            tm.group_name,
+            tm.player1_id,
+            tm.player2_id,
+            p1.name as player1_name,
+            p2.name as player2_name,
+            tm.scheduled_time,
+            tm.result,
+            tm.winner_id,
+            tm.status
+        FROM tournament_matches tm
+                 LEFT JOIN user p1 ON tm.player1_id = p1.id
+                 LEFT JOIN user p2 ON tm.player2_id = p2.id
+        WHERE tm.tournament_id = #{tournamentId} AND tm.delete_flag = 0
+        ORDER BY tm.group_name, tm.scheduled_time
+    </select>
+
+    <select id="selectTournamentGroups" resultMap="TournamentGroupVOMap">
+        <!-- 这个查询比较复杂，需要根据具体业务逻辑实现 -->
+        <!-- 这里提供一个简化的实现 -->
+        SELECT
+        tm.group_name as group_name,
+        tm.id as match_id,
+        tm.tournament_id as match_tournament_id,
+        tm.player1_id as match_player1_id,
+        tm.player2_id as match_player2_id,
+        p1.name as match_player1_name,
+        p2.name as match_player2_name,
+        tm.scheduled_time as match_scheduled_time,
+        tm.result as match_result,
+        tm.winner_id as match_winner_id,
+        tm.status as match_status
+        FROM tournament_matches tm
+        LEFT JOIN user p1 ON tm.player1_id = p1.id
+        LEFT JOIN user p2 ON tm.player2_id = p2.id
+        WHERE tm.tournament_id = #{tournamentId} AND tm.delete_flag = 0
+        ORDER BY tm.group_name, tm.scheduled_time
+    </select>
+
+    <select id="selectByTournamentAndGroup" resultMap="TournamentMatchMap">
+        SELECT * FROM tournament_matches
+        WHERE tournament_id = #{tournamentId} AND group_name = #{groupName} AND delete_flag = 0
+        ORDER BY scheduled_time
+    </select>
+
+</mapper>

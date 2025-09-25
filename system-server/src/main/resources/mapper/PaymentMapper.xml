@@ -1,0 +1,158 @@
+<!-- PaymentMapper.xml -->
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.system.mapper.PaymentMapper">
+
+    <resultMap id="PaymentMap" type="com.system.entity.Payment">
+        <id column="id" property="id"/>
+        <result column="user_id" property="userId"/>
+        <result column="related_id" property="relatedId"/>
+        <result column="amount" property="amount"/>
+        <result column="type" property="type"/>
+        <result column="method" property="method"/>
+        <result column="status" property="status"/>
+        <result column="order_no" property="orderNo"/>
+        <result column="qr_code_url" property="qrCodeUrl"/>
+        <result column="transaction_id" property="transactionId"/>
+        <result column="operator_id" property="operatorId"/>
+        <result column="remark" property="remark"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+        <result column="delete_flag" property="deleted"/>
+    </resultMap>
+
+    <resultMap id="PaymentRecordVOMap" type="com.system.vo.PaymentRecordVO">
+        <id column="id" property="id"/>
+        <result column="user_id" property="userId"/>
+        <result column="related_id" property="relatedId"/>
+        <result column="amount" property="amount"/>
+        <result column="type" property="type"/>
+        <result column="method" property="method"/>
+        <result column="status" property="status"/>
+        <result column="create_time" property="createdTime"/>
+    </resultMap>
+
+    <resultMap id="PaymentRecordDetailVOMap" type="com.system.vo.PaymentRecordDetailVO">
+        <id column="id" property="id"/>
+        <result column="user_id" property="userId"/>
+        <result column="user_name" property="userName"/>
+        <result column="related_id" property="relatedId"/>
+        <result column="amount" property="amount"/>
+        <result column="type" property="type"/>
+        <result column="method" property="method"/>
+        <result column="status" property="status"/>
+        <result column="create_time" property="createdTime"/>
+        <result column="operator_name" property="operatorName"/>
+        <result column="related_type" property="relatedInfo.type"/>
+        <result column="related_title" property="relatedInfo.title"/>
+        <result column="related_time" property="relatedInfo.time"/>
+    </resultMap>
+
+    <insert id="insertPayment">
+        INSERT INTO payments (id, user_id, related_id, amount, type, method, status,
+                              order_no, qr_code_url, transaction_id, operator_id, remark,
+                              create_time, update_time, delete_flag)
+        VALUES (#{id}, #{userId}, #{relatedId}, #{amount}, #{type}, #{method}, #{status},
+                #{orderNo}, #{qrCodeUrl}, #{transactionId}, #{operatorId}, #{remark},
+                #{createTime}, #{updateTime}, #{deleted})
+    </insert>
+
+    <select id="selectById" resultMap="PaymentMap">
+        SELECT * FROM payments WHERE id = #{id} AND delete_flag = 0
+    </select>
+
+    <select id="selectByOrderNo" resultMap="PaymentMap">
+        SELECT * FROM payments WHERE order_no = #{orderNo} AND delete_flag = 0
+    </select>
+
+    <update id="updatePaymentStatus">
+        UPDATE payments
+        SET status = #{status},
+            transaction_id = #{transactionId},
+            update_time = NOW()
+        WHERE id = #{id} AND delete_flag = 0
+    </update>
+
+    <select id="selectPayments" resultMap="PaymentRecordVOMap">
+        SELECT
+        id, user_id, related_id, amount, type, method, status, create_time
+        FROM payments
+        WHERE delete_flag = 0
+        <if test="userId != null">
+            AND user_id = #{userId}
+        </if>
+        <if test="queryDTO.type != null and queryDTO.type != ''">
+            AND type = #{queryDTO.type}
+        </if>
+        <if test="queryDTO.method != null and queryDTO.method != ''">
+            AND method = #{queryDTO.method}
+        </if>
+        <if test="queryDTO.status != null and queryDTO.status != ''">
+            AND status = #{queryDTO.status}
+        </if>
+        <if test="queryDTO.startDate != null">
+            AND DATE(create_time) >= #{queryDTO.startDate}
+        </if>
+        <if test="queryDTO.endDate != null">
+            AND DATE(create_time) &lt;= #{queryDTO.endDate}
+        </if>
+        ORDER BY create_time DESC
+        LIMIT #{offset}, #{limit}
+    </select>
+
+    <select id="countPayments" resultType="long">
+        SELECT COUNT(1)
+        FROM payments
+        WHERE delete_flag = 0
+        <if test="userId != null">
+            AND user_id = #{userId}
+        </if>
+        <if test="queryDTO.type != null and queryDTO.type != ''">
+            AND type = #{queryDTO.type}
+        </if>
+        <if test="queryDTO.method != null and queryDTO.method != ''">
+            AND method = #{queryDTO.method}
+        </if>
+        <if test="queryDTO.status != null and queryDTO.status != ''">
+            AND status = #{queryDTO.status}
+        </if>
+        <if test="queryDTO.startDate != null">
+            AND DATE(create_time) >= #{queryDTO.startDate}
+        </if>
+        <if test="queryDTO.endDate != null">
+            AND DATE(create_time) &lt;= #{queryDTO.endDate}
+        </if>
+    </select>
+
+    <select id="selectPaymentDetail" resultMap="PaymentRecordDetailVOMap">
+        SELECT
+            p.id,
+            p.user_id,
+            u.name as user_name,
+            p.related_id,
+            p.amount,
+            p.type,
+            p.method,
+            p.status,
+            p.create_time,
+            op.name as operator_name,
+            -- 关联业务信息（需要根据具体业务表查询）
+            NULL as related_type,
+            NULL as related_title,
+            NULL as related_time
+        FROM payments p
+                 LEFT JOIN user u ON p.user_id = u.id
+                 LEFT JOIN user op ON p.operator_id = op.id
+        WHERE p.id = #{id} AND p.delete_flag = 0
+    </select>
+
+    <select id="selectPendingPayments" resultMap="PaymentMap">
+        SELECT * FROM payments
+        WHERE status = 'pending'
+          AND delete_flag = 0
+          AND create_time &lt;= DATE_SUB(NOW(), INTERVAL #{timeoutMinutes} MINUTE)
+        ORDER BY create_time ASC
+    </select>
+
+</mapper>
