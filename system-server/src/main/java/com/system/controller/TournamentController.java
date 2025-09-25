@@ -37,16 +37,7 @@ public class TournamentController {
     @ResponseStatus(HttpStatus.CREATED)
     public TournamentVO createTournament(@Valid @RequestBody TournamentCreateDTO createDTO,
                                        HttpServletRequest request) {
-        String currentUserId = (String) request.getAttribute("userId");
-        String userRole = (String) request.getAttribute("userRole");
-        log.info("创建月赛: currentUserId={}, userRole={}", currentUserId, userRole);
-        
-        // 权限验证
-        if (!"super_admin".equals(userRole) && !"campus_admin".equals(userRole)) {
-            throw new RuntimeException("权限不足");
-        }
-        
-        return tournamentService.createTournament(createDTO, currentUserId);
+        return tournamentService.createTournament(createDTO);
     }
 
     @GetMapping("/{tournamentId}")

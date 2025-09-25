@@ -13,7 +13,7 @@ public interface TournamentService {
     
     TournamentVO getTournamentById(String tournamentId);
     
-    TournamentVO createTournament(TournamentCreateDTO createDTO, String currentUserId);
+    TournamentVO createTournament(TournamentCreateDTO createDTO);
     
     TournamentVO updateTournament(String tournamentId, TournamentUpdateDTO updateDTO, String currentUserId);
 }
