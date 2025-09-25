@@ -4,14 +4,14 @@
 <mapper namespace="com.system.mapper.TournamentMatchMapper">
 
     <resultMap id="TournamentMatchMap" type="com.system.entity.TournamentMatch">
-        <id column="id" property="id"/>
-        <result column="tournament_id" property="tournamentId"/>
+        <id column="id" property="id" typeHandler="com.system.handler.UUIDTypeHandler"/>
+        <result column="tournament_id" property="tournamentId" typeHandler="com.system.handler.UUIDTypeHandler"/>
         <result column="group_name" property="groupName"/>
-        <result column="player1_id" property="player1Id"/>
-        <result column="player2_id" property="player2Id"/>
+        <result column="player1_id" property="player1Id" typeHandler="com.system.handler.UUIDTypeHandler"/>
+        <result column="player2_id" property="player2Id" typeHandler="com.system.handler.UUIDTypeHandler"/>
         <result column="scheduled_time" property="scheduledTime"/>
         <result column="result" property="result"/>
-        <result column="winner_id" property="winnerId"/>
+        <result column="winner_id" property="winnerId" typeHandler="com.system.handler.UUIDTypeHandler"/>
         <result column="status" property="status"/>
         <result column="create_time" property="createTime"/>
         <result column="update_time" property="updateTime"/>

@@ -4,9 +4,9 @@
 <mapper namespace="com.system.mapper.PaymentMapper">
 
     <resultMap id="PaymentMap" type="com.system.entity.Payment">
-        <id column="id" property="id"/>
-        <result column="user_id" property="userId"/>
-        <result column="related_id" property="relatedId"/>
+        <id column="id" property="id" typeHandler="com.system.handler.UUIDTypeHandler"/>
+        <result column="user_id" property="userId" typeHandler="com.system.handler.UUIDTypeHandler"/>
+        <result column="related_id" property="relatedId" typeHandler="com.system.handler.UUIDTypeHandler"/>
         <result column="amount" property="amount"/>
         <result column="type" property="type"/>
         <result column="method" property="method"/>
@@ -69,7 +69,7 @@
         SELECT * FROM payment WHERE order_no = #{orderNo} AND deleted = 0
     </select>
 
-    <update id="updatepaymenttatus">
+    <update id="updatePaymentStatus">
         UPDATE payment
         SET status = #{status},
             transaction_id = #{transactionId},
@@ -77,7 +77,7 @@
         WHERE id = #{id} AND deleted = 0
     </update>
 
-    <select id="selectpayment" resultMap="PaymentRecordVOMap">
+    <select id="selectPayment" resultMap="PaymentRecordVOMap">
         SELECT
         id, user_id, related_id, amount, type, method, status, create_time
         FROM payment
@@ -104,7 +104,7 @@
         LIMIT #{offset}, #{limit}
     </select>
 
-    <select id="countpayment" resultType="long">
+    <select id="countPayments" resultType="long">
         SELECT COUNT(1)
         FROM payment
         WHERE deleted = 0
@@ -150,7 +150,7 @@
         WHERE p.id = #{id} AND p.deleted = 0
     </select>
 
-    <select id="selectPendingpayment" resultMap="PaymentMap">
+    <select id="selectPendingPayments" resultMap="PaymentMap">
         SELECT * FROM payment
         WHERE status = 'pending'
           AND deleted = 0

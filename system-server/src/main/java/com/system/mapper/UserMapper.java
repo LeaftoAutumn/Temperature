@@ -1,6 +1,7 @@
 package com.system.mapper;
 
 import com.system.entity.User;
+import com.system.vo.CampusUserVO;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
@@ -23,4 +24,7 @@ public interface UserMapper {
     List<User> selectUsersByCampusId(@Param("campusId") UUID campusId);
 
     int updateUser(User user);
+
+    List<CampusUserVO> selectSpecialUsersByCampusIdAndRole(@Param("campusId") UUID campusId,
+                                             @Param("role") String role);
 }

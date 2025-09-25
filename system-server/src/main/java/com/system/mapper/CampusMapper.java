@@ -23,9 +23,6 @@ public interface CampusMapper {
     
     boolean existsByName(@Param("name") String name);
     
-    List<CampusUserVO> selectUsersByCampusId(@Param("campusId") UUID campusId, 
-                                           @Param("role") String role);
-    
     long countUsersByCampusId(@Param("campusId") UUID campusId, 
                             @Param("role") String role);
 }

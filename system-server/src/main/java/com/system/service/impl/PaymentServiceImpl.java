@@ -202,7 +202,7 @@ public class PaymentServiceImpl implements PaymentService {
         long offset = (page - 1) * limit;
         
         // 查询支付记录
-        List<PaymentRecordVO> payments = paymentMapper.selectPayments(userUUID, queryDTO, offset, limit);
+        List<PaymentRecordVO> payments = paymentMapper.selectPayment(userUUID, queryDTO, offset, limit);
         
         // 查询总数
         long total = paymentMapper.countPayments(userUUID, queryDTO);

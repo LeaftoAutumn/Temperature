@@ -4,7 +4,7 @@
 <mapper namespace="com.system.mapper.StudentMapper">
 
     <resultMap id="StudentMap" type="com.system.entity.Student">
-        <id column="user_id" property="userId"/>
+        <id column="user_id" property="userId" typeHandler="com.system.handler.UUIDTypeHandler"/>
         <result column="balance" property="balance"/>
         <result column="max_coaches" property="maxCoaches"/>
         <result column="cancel_count" property="cancelCount"/>

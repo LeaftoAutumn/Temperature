@@ -4,7 +4,7 @@
 <mapper namespace="com.system.mapper.TournamentMapper">
 
     <resultMap id="TournamentMap" type="com.system.entity.Tournament">
-        <id column="id" property="id"/>
+        <id column="id" property="id" typeHandler="com.system.handler.UUIDTypeHandler"/>
         <result column="name" property="name"/>
         <result column="event_date" property="eventDate"/>
         <result column="group_type" property="groupType"/>

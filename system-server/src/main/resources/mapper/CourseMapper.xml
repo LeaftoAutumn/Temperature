@@ -4,9 +4,9 @@
 <mapper namespace="com.system.mapper.CourseMapper">
 
     <resultMap id="CourseMap" type="com.system.entity.Course">
-        <id column="id" property="id"/>
-        <result column="coach_id" property="coachId"/>
-        <result column="student_id" property="studentId"/>
+        <id column="id" property="id" typeHandler="com.system.handler.UUIDTypeHandler"/>
+        <result column="coach_id" property="coachId" typeHandler="com.system.handler.UUIDTypeHandler"/>
+        <result column="student_id" property="studentId" typeHandler="com.system.handler.UUIDTypeHandler"/>
         <result column="start_time" property="startTime"/>
         <result column="end_time" property="endTime"/>
         <result column="price" property="price"/>

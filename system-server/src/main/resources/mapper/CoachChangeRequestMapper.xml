@@ -4,7 +4,7 @@
 <mapper namespace="com.system.mapper.CoachChangeRequestMapper">
 
     <resultMap id="CoachChangeRequestMap" type="com.system.entity.CoachChangeRequest">
-        <id column="id" property="id"/>
+        <id column="id" property="id" typeHandler="com.system.handler.UUIDTypeHandler"/>
         <result column="student_id" property="studentId"/>
         <result column="current_coach_id" property="currentCoachId"/>
         <result column="new_coach_id" property="newCoachId"/>

@@ -4,10 +4,10 @@
 <mapper namespace="com.system.mapper.EvaluationMapper">
 
     <resultMap id="EvaluationMap" type="com.system.entity.Evaluation">
-        <id column="id" property="id"/>
-        <result column="course_id" property="courseId"/>
-        <result column="from_user_id" property="fromUserId"/>
-        <result column="to_user_id" property="toUserId"/>
+        <id column="id" property="id" typeHandler="com.system.handler.UUIDTypeHandler"/>
+        <result column="course_id" property="courseId" typeHandler="com.system.handler.UUIDTypeHandler"/>
+        <result column="from_user_id" property="fromUserId" typeHandler="com.system.handler.UUIDTypeHandler"/>
+        <result column="to_user_id" property="toUserId" typeHandler="com.system.handler.UUIDTypeHandler"/>
         <result column="content" property="content"/>
         <result column="rating" property="rating"/>
         <result column="create_time" property="createTime"/>

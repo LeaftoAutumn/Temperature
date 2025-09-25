@@ -6,6 +6,7 @@ import com.system.dto.CampusQueryDTO;
 import com.system.dto.CampusUpdateRequestDTO;
 import com.system.entity.Campus;
 import com.system.mapper.CampusMapper;
+import com.system.mapper.UserMapper;
 import com.system.service.CampusService;
 import com.system.vo.*;
 import lombok.extern.slf4j.Slf4j;
@@ -24,6 +25,8 @@ public class CampusServiceImpl implements CampusService {
 
     @Autowired
     private CampusMapper campusMapper;
+    @Autowired
+    private UserMapper userMapper;
 
     @Override
     public List<CampusVO> listAllCampuses() {
@@ -121,8 +124,7 @@ public class CampusServiceImpl implements CampusService {
         long offset = (page - 1) * limit;
         
         // 查询用户列表
-        List<CampusUserVO> users = campusMapper.selectUsersByCampusId(
-            UUID.fromString(campusId), queryDTO.getRole());
+        List<CampusUserVO> users = userMapper.selectSpecialUsersByCampusIdAndRole(UUID.fromString(campusId), queryDTO.getRole());
         
         // 查询总数
         long total = campusMapper.countUsersByCampusId(

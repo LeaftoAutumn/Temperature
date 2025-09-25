@@ -4,9 +4,9 @@
 <mapper namespace="com.system.mapper.CoachStudentMatchMapper">
 
     <resultMap id="CoachStudentMatchMap" type="com.system.entity.CoachStudentMatch">
-        <id column="id" property="id"/>
-        <result column="student_id" property="studentId"/>
-        <result column="coach_id" property="coachId"/>
+        <id column="id" property="id" typeHandler="com.system.handler.UUIDTypeHandler"/>
+        <result column="student_id" property="studentId" typeHandler="com.system.handler.UUIDTypeHandler"/>
+        <result column="coach_id" property="coachId" typeHandler="com.system.handler.UUIDTypeHandler"/>
         <result column="status" property="status"/>
         <result column="create_time" property="createTime"/>
         <result column="update_time" property="updateTime"/>

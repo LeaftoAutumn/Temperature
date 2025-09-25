@@ -4,24 +4,14 @@
 <mapper namespace="com.system.mapper.CampusMapper">
 
     <resultMap id="CampusMap" type="com.system.entity.Campus">
-        <id column="id" property="campusId"/>
+        <id column="campus_id" property="campusId" typeHandler="com.system.handler.UUIDTypeHandler"/>
         <result column="name" property="name"/>
         <result column="address" property="address"/>
-        <result column="contact_phone" property="phone"/>
-        <result column="is_center" property="center"/>
+        <result column="phone" property="phone"/>
+        <result column="center" property="center"/>
         <result column="create_time" property="createTime"/>
         <result column="update_time" property="updateTime"/>
         <result column="deleted" property="deleted"/>
-    </resultMap>
-
-    <resultMap id="CampusUserVOMap" type="com.system.vo.CampusUserVO">
-        <result column="id" property="id"/>
-        <result column="username" property="username"/>
-        <result column="name" property="name"/>
-        <result column="phone" property="phone"/>
-        <result column="email" property="email"/>
-        <result column="role" property="role"/>
-        <result column="create_time" property="createTime"/>
     </resultMap>
 
     <select id="selectAll" resultMap="CampusMap">
@@ -56,18 +46,6 @@
         SELECT COUNT(1)
         FROM campus
         WHERE name = #{name} AND deleted = 0
-    </select>
-
-    <select id="selectUsersByCampusId" resultMap="CampusUserVOMap">
-        SELECT u.id, u.username, u.name, u.phone, u.email, u.role, u.create_time
-        FROM user u
-        WHERE u.campus_id = #{campusId}
-        AND u.deleted = 0
-        <if test="role != null and role != ''">
-            AND u.role = #{role}
-        </if>
-        ORDER BY u.create_time DESC
-        LIMIT #{offset}, #{limit}
     </select>
 
     <select id="countUsersByCampusId" resultType="long">

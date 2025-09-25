@@ -4,8 +4,8 @@
 <mapper namespace="com.system.mapper.SystemLogMapper">
 
     <resultMap id="SystemLogMap" type="com.system.entity.SystemLog">
-        <id column="id" property="id"/>
-        <result column="user_id" property="userId"/>
+        <id column="id" property="id" typeHandler="com.system.handler.UUIDTypeHandler"/>
+        <result column="user_id" property="userId" typeHandler="com.system.handler.UUIDTypeHandler"/>
         <result column="user_name" property="userName"/>
         <result column="user_role" property="userRole"/>
         <result column="action" property="action"/>

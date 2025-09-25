@@ -4,12 +4,12 @@
 <mapper namespace="com.system.mapper.NotificationMapper">
 
     <resultMap id="NotificationMap" type="com.system.entity.Notification">
-        <id column="id" property="id"/>
-        <result column="user_id" property="userId"/>
+        <id column="id" property="id" typeHandler="com.system.handler.UUIDTypeHandler"/>
+        <result column="user_id" property="userId" typeHandler="com.system.handler.UUIDTypeHandler"/>
         <result column="title" property="title"/>
         <result column="content" property="content"/>
         <result column="type" property="type"/>
-        <result column="related_id" property="relatedId"/>
+        <result column="related_id" property="relatedId" typeHandler="com.system.handler.UUIDTypeHandler"/>
         <result column="related_type" property="relatedType"/>
         <result column="is_read" property="isRead"/>
         <result column="create_time" property="createTime"/>

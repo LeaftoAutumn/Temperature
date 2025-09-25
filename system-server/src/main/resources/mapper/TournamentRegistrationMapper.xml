@@ -4,9 +4,9 @@
 <mapper namespace="com.system.mapper.TournamentRegistrationMapper">
 
     <resultMap id="TournamentRegistrationMap" type="com.system.entity.TournamentRegistration">
-        <id column="id" property="id"/>
-        <result column="student_id" property="studentId"/>
-        <result column="tournament_id" property="tournamentId"/>
+        <id column="id" property="id" typeHandler="com.system.handler.UUIDTypeHandler"/>
+        <result column="student_id" property="studentId" typeHandler="com.system.handler.UUIDTypeHandler"/>
+        <result column="tournament_id" property="tournamentId" typeHandler="com.system.handler.UUIDTypeHandler"/>
         <result column="fee_paid" property="feePaid"/>
         <result column="create_time" property="createTime"/>
         <result column="update_time" property="updateTime"/>

@@ -4,7 +4,7 @@
 <mapper namespace="com.system.mapper.CoachMapper">
 
     <resultMap id="CoachMap" type="com.system.entity.Coach">
-        <id column="user_id" property="userId"/>
+        <id column="user_id" property="userId" typeHandler="com.system.handler.UUIDTypeHandler"/>
         <result column="level" property="level"/>
         <result column="hourly_rate" property="hourlyRate"/>
         <result column="photo_url" property="photoUrl"/>

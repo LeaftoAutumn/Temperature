@@ -17,9 +17,11 @@ mybatis:
   #mapper配置文件
   mapper-locations: classpath:mapper/*.xml
   type-aliases-package: com.system.entity
+  type-handlers-package: com.system.handler
   configuration:
     #开启驼峰命名
     map-underscore-to-camel-case: true
+    default-enum-type-handler: org.apache.ibatis.type.EnumTypeHandler
 
 logging:
   level:

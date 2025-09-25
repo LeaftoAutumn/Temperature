@@ -23,7 +23,7 @@ public interface PaymentMapper {
     int updatePaymentStatus(@Param("id") UUID id, @Param("status") String status, 
                           @Param("transactionId") String transactionId);
     
-    List<PaymentRecordVO> selectPayments(@Param("userId") UUID userId,
+    List<PaymentRecordVO> selectPayment(@Param("userId") UUID userId,
                                        @Param("queryDTO") PaymentQueryDTO queryDTO,
                                        @Param("offset") long offset,
                                        @Param("limit") int limit);
