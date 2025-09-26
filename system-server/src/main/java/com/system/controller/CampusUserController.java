@@ -1,7 +1,9 @@
 // CampusUserController.java
 package com.system.controller;
 
+import com.system.annotation.RequireRole;
 import com.system.dto.CampusQueryDTO;
+import com.system.enumeration.UserRole;
 import com.system.service.CampusService;
 import com.system.vo.CampusUserPageVO;
 import io.swagger.annotations.Api;
@@ -21,6 +23,7 @@ public class CampusUserController {
 
     @GetMapping
     @ApiOperation("获取校区用户列表")
+    @RequireRole({UserRole.SUPER_ADMIN, UserRole.ADMIN})
     public CampusUserPageVO listCampusUsers(@PathVariable String campusId, 
                                           @ModelAttribute CampusQueryDTO queryDTO) {
         log.info("获取校区用户列表: {}", campusId);

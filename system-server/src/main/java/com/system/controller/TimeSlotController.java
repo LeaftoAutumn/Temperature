@@ -25,6 +25,7 @@ public class TimeSlotController {
 
     @GetMapping("/available")
     @ApiOperation("查询可用时段")
+
     public List<AvailableTimeSlotVO> getAvailableTimeSlots(@Valid AvailableTimeSlotQueryDTO queryDTO) {
         log.info("查询可用时段: coachId={}, date={}", queryDTO.getCoachId(), queryDTO.getDate());
         return reservationService.getAvailableTimeSlots(queryDTO);

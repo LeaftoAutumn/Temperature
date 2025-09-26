@@ -1,8 +1,10 @@
 package com.system.controller;
 
+import com.system.annotation.RequireRole;
 import com.system.dto.CreateReservationRequestDTO;
 import com.system.dto.ReservationQueryDTO;
 import com.system.dto.UpdateReservationStatusDTO;
+import com.system.enumeration.UserRole;
 import com.system.service.ReservationService;
 import com.system.vo.ReservationDetailVO;
 import com.system.vo.ReservationPageVO;
@@ -28,6 +30,7 @@ public class ReservationController {
     @PostMapping
     @ApiOperation("创建课程预约")
     @ResponseStatus(HttpStatus.CREATED)
+    @RequireRole({UserRole.STUDENT})
     public ReservationDetailVO createReservation(@Valid @RequestBody CreateReservationRequestDTO createRequestDTO, 
                                                HttpServletRequest request) {
         String currentUserId = (String) request.getAttribute("userId");
@@ -37,12 +40,14 @@ public class ReservationController {
 
     @GetMapping
     @ApiOperation("获取预约列表")
+    @RequireRole({UserRole.COACH, UserRole.STUDENT})
     public ReservationPageVO listReservations(@Valid ReservationQueryDTO queryDTO, HttpServletRequest request) {
         return reservationService.listReservations(queryDTO);
     }
 
     @PutMapping("/{reservationId}")
     @ApiOperation("处理预约（确认/拒绝）")
+    @RequireRole({UserRole.COACH, UserRole.STUDENT})
     public ReservationDetailVO updateReservationStatus(@PathVariable String reservationId,
                                                      @Valid @RequestBody UpdateReservationStatusDTO updateDTO,
                                                      HttpServletRequest request) {
