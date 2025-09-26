@@ -26,5 +26,5 @@ public interface UserMapper {
     int updateUser(User user);
 
     List<CampusUserVO> selectSpecialUsersByCampusIdAndRole(@Param("campusId") UUID campusId,
-                                             @Param("role") String role);
+                                             @Param("role") String role, long offset, int limit);
 }

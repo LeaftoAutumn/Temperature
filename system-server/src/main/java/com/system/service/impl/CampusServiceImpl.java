@@ -126,7 +126,7 @@ public class CampusServiceImpl implements CampusService {
         long offset = (page - 1) * limit;
         
         // 查询用户列表
-        List<CampusUserVO> users = userMapper.selectSpecialUsersByCampusIdAndRole(UUID.fromString(campusId), queryDTO.getRole());
+        List<CampusUserVO> users = userMapper.selectSpecialUsersByCampusIdAndRole(UUID.fromString(campusId), queryDTO.getRole(), offset, limit);
         
         // 查询总数
         long total = campusMapper.countUsersByCampusId(

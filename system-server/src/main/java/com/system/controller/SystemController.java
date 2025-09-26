@@ -41,15 +41,7 @@ public class SystemController {
     @GetMapping("/status")
     @ApiOperation("获取系统状态")
     public SystemStatusVO getSystemStatus(HttpServletRequest request) {
-        String currentUserId = (String) request.getAttribute("userId");
-        String userRole = (String) request.getAttribute("userRole");
-        log.info("获取系统状态: currentUserId={}, userRole={}", currentUserId, userRole);
-        
-        // 权限验证 - 只有管理员可以查看系统状态
-        if (!"super_admin".equals(userRole) && !"campus_admin".equals(userRole)) {
-            throw new RuntimeException("权限不足");
-        }
-        
+
         return systemService.getSystemStatus();
     }
 }

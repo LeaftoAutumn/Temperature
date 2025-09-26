@@ -7,6 +7,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import java.io.Serializable;
 import java.time.LocalDate;
@@ -20,6 +21,8 @@ import java.util.UUID;
 public class PaymentQueryDTO implements Serializable {
 
     private UUID studentId;
+
+    private UUID campusId;
     
     @ApiModelProperty(value = "支付类型")
     private String type; // topup, course, tournament, refund
@@ -31,9 +34,11 @@ public class PaymentQueryDTO implements Serializable {
     private String status; // pending, completed, failed
     
     @ApiModelProperty(value = "开始日期")
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
     private LocalDate startDate;
     
     @ApiModelProperty(value = "结束日期")
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
     private LocalDate endDate;
     
     @ApiModelProperty(value = "页码")
@@ -41,4 +46,6 @@ public class PaymentQueryDTO implements Serializable {
     
     @ApiModelProperty(value = "每页数量")
     private Integer limit;
+
+    private Integer pageSize;
 }
