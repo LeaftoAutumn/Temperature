@@ -1,5 +1,6 @@
 package com.system.controller;
 
+import com.system.context.UserContext;
 import com.system.dto.EvaluationCreateDTO;
 import com.system.dto.EvaluationQueryDTO;
 import com.system.service.EvaluationService;
@@ -27,9 +28,9 @@ public class EvaluationController {
 
     @GetMapping("/pending")
     @ApiOperation("获取待评价课程列表")
-    public List<PendingEvaluationVO> getPendingEvaluations(@Valid String coachId, HttpServletRequest request) {
-        log.info("获取待评价课程列表: currentUserId={}", coachId);
-        return evaluationService.getPendingEvaluations(coachId);
+    public List<PendingEvaluationVO> getPendingEvaluations(HttpServletRequest request) {
+        log.info("获取待评价课程列表: currentUserId={}", UserContext.getUserId());
+        return evaluationService.getPendingEvaluations(UserContext.getUserId());
     }
 
     @PostMapping

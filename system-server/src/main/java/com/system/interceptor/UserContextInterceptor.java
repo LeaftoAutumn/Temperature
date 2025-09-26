@@ -2,72 +2,93 @@ package com.system.interceptor;
 
 import com.system.context.UserContext;
 import com.system.exception.UnauthorizedException;
-import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.util.Enumeration;
-import java.util.UUID;
 
 @Component
 public class UserContextInterceptor implements HandlerInterceptor {
+
+    // 静态初始化块，确保类被加载
+    static {
+        System.out.println("✅ UserContextInterceptor 类被加载");
+    }
+
+    public UserContextInterceptor() {
+        System.out.println("✅ UserContextInterceptor 实例被创建");
+        System.out.println("✅ 实例哈希码: " + this.hashCode());
+        System.out.println("✅ 线程: " + Thread.currentThread().getName());
+    }
 
     @Override
     public boolean preHandle(HttpServletRequest request,
                              HttpServletResponse response,
                              Object handler) throws Exception {
-        // 清理之前的上下文（确保线程安全）
-        UserContext.clear();
+        System.out.println("\n🎯 ===== 拦截器 PRE-HANDLE 开始 =====");
+        System.out.println("🎯 线程: " + Thread.currentThread().getName());
+        System.out.println("🎯 拦截器实例: " + this.hashCode());
+        System.out.println("🎯 请求URL: " + request.getRequestURL());
+        System.out.println("🎯 请求URI: " + request.getRequestURI());
+        System.out.println("🎯 请求方法: " + request.getMethod());
+        System.out.println("🎯 远程地址: " + request.getRemoteAddr());
 
-        // 调试：打印所有请求头
-        System.out.println("=== 拦截器调试信息 ===");
-        System.out.println("请求URL: " + request.getRequestURL());
-        Enumeration<String> headerNames = request.getHeaderNames();
+        // 打印所有请求头
+        java.util.Enumeration<String> headerNames = request.getHeaderNames();
         while (headerNames.hasMoreElements()) {
             String headerName = headerNames.nextElement();
-            System.out.println("请求头: " + headerName + " = " + request.getHeader(headerName));
+            if (headerName.toLowerCase().contains("user") ||
+                    headerName.toLowerCase().contains("id") ||
+                    headerName.toLowerCase().contains("auth")) {
+                System.out.println("🎯 请求头[" + headerName + "]: " + request.getHeader(headerName));
+            }
         }
 
-        // 从请求头获取用户ID（尝试多种可能的header名称）
-        String userId = request.getHeader("X-User-Id");
-        if (userId == null) {
-            userId = request.getHeader("x-user-id");
-        }
-        if (userId == null) {
-            userId = request.getHeader("X-USER-ID");
-        }
-        if (userId == null) {
-            userId = request.getHeader("userId");
-        }
+        // 清理上下文
+        UserContext.clear();
 
-        System.out.println("最终获取的用户ID: " + userId);
+        // 获取用户ID
+        String userId = getUserIdFromHeaders(request);
+        System.out.println("🎯 提取的用户ID: " + userId);
 
         if (userId != null && !userId.trim().isEmpty()) {
-            try {
-                UserContext.setUserId(UUID.fromString(userId.trim()));
-                System.out.println("成功设置用户ID到上下文: " + UserContext.getUserId());
-            } catch (IllegalArgumentException e) {
-                System.out.println("用户ID格式错误: " + userId);
-                throw new UnauthorizedException("无效的用户ID格式: " + userId);
-            }
+            UserContext.setUserId(userId.trim());
+            System.out.println("✅ 用户ID设置成功: " + UserContext.getUserId());
         } else {
-            System.out.println("警告：未找到用户ID请求头");
-            // 根据业务需求决定是否抛出异常
-            // throw new UnauthorizedException("缺少用户ID");
+            System.out.println("⚠️ 未找到用户ID");
         }
 
-        System.out.println("拦截器执行完成");
+        System.out.println("✅ 拦截器 PRE-HANDLE 完成");
+        System.out.println("🎯 ===== 拦截器 PRE-HANDLE 结束 =====\n");
         return true;
+    }
+
+    private String getUserIdFromHeaders(HttpServletRequest request) {
+        String[] headers = {"x-user-id", "X-User-Id", "X-USER-ID", "userId", "User-Id", "user-id", "authorization"};
+
+        for (String header : headers) {
+            String value = request.getHeader(header);
+            if (value != null && !value.trim().isEmpty()) {
+                System.out.println("🎯 从Header[" + header + "]获取值: " + value);
+
+                // 如果是authorization头，尝试提取用户ID
+                if (header.equalsIgnoreCase("authorization") && value.startsWith("Bearer ")) {
+                    // 这里可以解析JWT token获取用户ID
+                    System.out.println("🎯 找到Authorization头，但需要解析JWT");
+                } else {
+                    return value;
+                }
+            }
+        }
+        return null;
     }
 
     @Override
     public void afterCompletion(HttpServletRequest request,
                                 HttpServletResponse response,
                                 Object handler, Exception ex) {
-        // 清理线程局部变量，防止内存泄漏
+        System.out.println("🎯 拦截器 AFTER-COMPLETION 清理上下文");
         UserContext.clear();
-        System.out.println("清理用户上下文");
     }
 }

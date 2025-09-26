@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.RestController;
 public class TestController {
 
     @GetMapping("/test/role-check")
-    @RequireRole({UserRole.COACH, UserRole.STUDENT})
     public String testRoleCheck() {
         String userId = String.valueOf(UserContext.getUserId());
         return "角色检查通过！当前用户ID: " + userId;

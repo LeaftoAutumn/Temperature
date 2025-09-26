@@ -43,7 +43,7 @@ public class RoleCheckAspect {
 
         // 获取当前用户ID
         String userIdStr = String.valueOf(UserContext.getUserId());
-        UUID userId = UserContext.getUserId();
+        UUID userId = UUID.fromString(UserContext.getUserId());
 
         System.out.println("Aspect中获取的用户ID字符串: " + userIdStr);
         System.out.println("Aspect中获取的用户ID UUID: " + userId);
